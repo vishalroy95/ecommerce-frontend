@@ -2,14 +2,17 @@
 // import axios from 'axios';
 
 // const Addresses = () => {
-//   const [form, setForm] = useState({
+//   const initialForm = {
 //     fullName: '', phone: '', pincode: '', state: '', city: '',
 //     addressLine: '', landmark: '', addressType: 'Home',
-//   });
+//   };
+
+//   const [form, setForm] = useState(initialForm);
 //   const [addresses, setAddresses] = useState([]);
 //   const [areaSuggestions, setAreaSuggestions] = useState([]);
 //   const [isEditMode, setIsEditMode] = useState(false);
 //   const [editId, setEditId] = useState(null);
+//   const [errorMsg, setErrorMsg] = useState('');
 
 //   const fetchAddresses = async () => {
 //     try {
@@ -27,6 +30,7 @@
 //     try {
 //       const res = await axios.get(`https://api.postalpincode.in/pincode/${pin}`);
 //       const data = res.data[0];
+
 //       if (data.Status === 'Success') {
 //         const postOffice = data.PostOffice?.[0];
 //         const allAreas = data.PostOffice.map((po) => po.Name);
@@ -36,19 +40,25 @@
 //           city: postOffice.District,
 //         }));
 //         setAreaSuggestions(allAreas);
+//         setErrorMsg('');
 //       } else {
 //         setAreaSuggestions([]);
+//         setErrorMsg('❌ Invalid Pincode');
+//         setForm({ ...form, city: '', state: '' });
 //       }
 //     } catch (err) {
 //       console.error('Pincode fetch error:', err);
+//       setErrorMsg('❌ Invalid Pincode');
 //     }
 //   };
 
 //   const handlePincodeChange = (e) => {
 //     const val = e.target.value;
-//     setForm((prev) => ({ ...prev, pincode: val }));
+//     setForm({ ...form, pincode: val });
 //     if (val.length === 6) {
 //       fetchPincodeData(val);
+//     } else {
+//       setErrorMsg('');
 //     }
 //   };
 
@@ -57,25 +67,33 @@
 //     const token = localStorage.getItem('token');
 
 //     try {
+//       if (!form.city || !form.state) {
+//         setErrorMsg('❌ Please enter valid pincode to fetch city/state');
+//         return;
+//       }
+
+//       const payload = { ...form };
+//       delete payload._id;
+//       delete payload.__v;
+
 //       if (isEditMode) {
-//         await axios.put(`/api/addresses/${editId}`, form, {
+//         await axios.put(`/api/addresses/${editId}`, payload, {
 //           headers: { Authorization: `Bearer ${token}` },
 //         });
 //       } else {
-//         await axios.post('/api/addresses', form, {
+//         await axios.post('/api/addresses', payload, {
 //           headers: { Authorization: `Bearer ${token}` },
 //         });
 //       }
 
-//       setForm({
-//         fullName: '', phone: '', pincode: '', state: '', city: '',
-//         addressLine: '', landmark: '', addressType: 'Home',
-//       });
+//       setForm(initialForm);
 //       setIsEditMode(false);
 //       setEditId(null);
+//       setErrorMsg('');
 //       fetchAddresses();
 //     } catch (err) {
-//       console.log(err);
+//       console.error(err);
+//       setErrorMsg('❌ Something went wrong while saving the address');
 //     }
 //   };
 
@@ -83,11 +101,12 @@
 //     setForm(addr);
 //     setIsEditMode(true);
 //     setEditId(addr._id);
+//     setErrorMsg('');
 //   };
 
 //   const handleDelete = async (id) => {
 //     const token = localStorage.getItem('token');
-//     if (!window.confirm("Are you sure you want to delete this address?")) return;
+//     if (!window.confirm('Delete this address?')) return;
 //     try {
 //       await axios.delete(`/api/addresses/${id}`, {
 //         headers: { Authorization: `Bearer ${token}` },
@@ -107,6 +126,8 @@
 //       <h2 className="text-2xl font-semibold text-gray-800 mb-6">
 //         {isEditMode ? 'Edit Address' : 'Add New Address'}
 //       </h2>
+
+//       {errorMsg && <div className="text-red-600 mb-2">{errorMsg}</div>}
 
 //       <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
 //         <input value={form.fullName} onChange={(e) => setForm({ ...form, fullName: e.target.value })} placeholder="Full Name" className="border p-2 rounded" required />
@@ -131,6 +152,7 @@
 //         </button>
 //       </form>
 
+//       {/* 🔽 Saved Addresses */}
 //       <div className="mt-10">
 //         <h3 className="text-xl font-semibold mb-3 text-gray-700">Saved Addresses</h3>
 //         {addresses.length === 0 ? (
@@ -157,8 +179,14 @@
 
 
 
+// url updated 
+
+
+
+
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { API_URL } from '../config'; // <- import
 
 const Addresses = () => {
   const initialForm = {
@@ -176,7 +204,7 @@ const Addresses = () => {
   const fetchAddresses = async () => {
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.get('/api/addresses', {
+      const res = await axios.get(`${API_URL}/api/addresses`, {  // <- URL updated
         headers: { Authorization: `Bearer ${token}` },
       });
       setAddresses(res.data.addresses || []);
@@ -236,11 +264,11 @@ const Addresses = () => {
       delete payload.__v;
 
       if (isEditMode) {
-        await axios.put(`/api/addresses/${editId}`, payload, {
+        await axios.put(`${API_URL}/api/addresses/${editId}`, payload, {  // <- URL updated
           headers: { Authorization: `Bearer ${token}` },
         });
       } else {
-        await axios.post('/api/addresses', payload, {
+        await axios.post(`${API_URL}/api/addresses`, payload, {  // <- URL updated
           headers: { Authorization: `Bearer ${token}` },
         });
       }
@@ -267,7 +295,7 @@ const Addresses = () => {
     const token = localStorage.getItem('token');
     if (!window.confirm('Delete this address?')) return;
     try {
-      await axios.delete(`/api/addresses/${id}`, {
+      await axios.delete(`${API_URL}/api/addresses/${id}`, {  // <- URL updated
         headers: { Authorization: `Bearer ${token}` },
       });
       fetchAddresses();
