@@ -119,7 +119,7 @@
 
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { API_URL } from "../../config";   // 👈 yaha import add kiya
+import { API_URL } from "../config";   // 👈 yaha import add kiya
 
 const SignupPage = () => {
   const [name, setName] = useState("");
