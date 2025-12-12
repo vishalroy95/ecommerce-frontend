@@ -119,7 +119,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { API_URL } from "../../config";   // 👈 backend URL import
+import { API_URL } from "../config";   // 👈 backend URL import
 
 const LoginPage = () => {
   const [email, setEmail] = useState("");
