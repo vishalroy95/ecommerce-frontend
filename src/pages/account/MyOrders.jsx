@@ -109,7 +109,8 @@
 // src/pages/Orders.jsx
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { API_URL } from "../config"; // <- import
+import { API_URL } from "../../config";   // <- import
+ 
 
 const Orders = () => {
   const [orders, setOrders] = useState([]);
