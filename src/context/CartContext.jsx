@@ -203,12 +203,13 @@
 
 
 
-// src/context/CartContext.jsx
 import { createContext, useContext, useEffect, useState } from "react";
 import axios from "axios";
 
 export const CartContext = createContext();
 export const useCart = () => useContext(CartContext);
+
+const BASE_URL = "https://e-commerce-backend-4-vplk.onrender.com/api/cart";
 
 export const CartProvider = ({ children }) => {
   const [cart, setCart] = useState([]);
@@ -246,7 +247,7 @@ export const CartProvider = ({ children }) => {
       setLoading(true);
       if (isAuthed) {
         try {
-          const res = await axios.get("https://e-commerce-backend-4-vplk.onrender.com", {
+          const res = await axios.get(`${BASE_URL}`, {
             headers: { Authorization: `Bearer ${token}` },
           });
           setCart((res.data?.cart?.items || []).map(normalizeItem));
@@ -263,14 +264,13 @@ export const CartProvider = ({ children }) => {
 
   const addToCart = async (product, qty = 1) => {
     const productId = product._id || product.id || product.productId;
-
     const normalized = normalizeItem({ ...product, _id: productId, quantity: qty });
 
     if (isAuthed) {
       try {
         const res = await axios.post(
-          "https://e-commerce-backend-4-vplk.onrender.com",
-          { productId: (productId || "").toString(), quantity: qty },
+          `${BASE_URL}/add`,
+          { productId: productId.toString(), quantity: qty },
           { headers: { Authorization: `Bearer ${token}` } }
         );
         setCart((res.data?.cart?.items || []).map(normalizeItem));
@@ -282,6 +282,7 @@ export const CartProvider = ({ children }) => {
       const idx = updated.findIndex((i) => i.id === normalized.id);
       if (idx >= 0) updated[idx].quantity += qty;
       else updated.push(normalized);
+
       setCart(updated);
       writeGuestCart(updated);
     }
@@ -289,10 +290,11 @@ export const CartProvider = ({ children }) => {
 
   const removeFromCart = async (id) => {
     if (!id) return;
+
     if (isAuthed) {
       try {
         const res = await axios.post(
-          "https://e-commerce-backend-4-vplk.onrender.com",
+          `${BASE_URL}/remove`,
           { productId: id.toString() },
           { headers: { Authorization: `Bearer ${token}` } }
         );
@@ -313,7 +315,7 @@ export const CartProvider = ({ children }) => {
     if (isAuthed) {
       try {
         const res = await axios.post(
-          "https://e-commerce-backend-4-vplk.onrender.com",
+          `${BASE_URL}/update`,
           { productId: id.toString(), quantity: qty },
           { headers: { Authorization: `Bearer ${token}` } }
         );
@@ -346,7 +348,7 @@ export const CartProvider = ({ children }) => {
     if (isAuthed) {
       try {
         await axios.post(
-          "https://e-commerce-backend-4-vplk.onrender.com",
+          `${BASE_URL}/clear`,
           {},
           { headers: { Authorization: `Bearer ${token}` } }
         );
