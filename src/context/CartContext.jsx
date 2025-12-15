@@ -247,8 +247,9 @@ export const CartProvider = ({ children }) => {
       setLoading(true);
       if (isAuthed) {
         try {
+          console.log("🟡 Token being sent:", token);
           const res = await axios.get(`${BASE_URL}`, {
-            headers: { Authorization: `Bearer ${token}` },
+           headers: { Authorization: `Bearer ${token}` },
           });
           setCart((res.data?.cart?.items || []).map(normalizeItem));
         } catch (err) {
