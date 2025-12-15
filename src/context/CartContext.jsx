@@ -263,7 +263,10 @@ export const CartProvider = ({ children }) => {
   }, [isAuthed, token]);
 
   const addToCart = async (product, qty = 1) => {
+    console.log("🟢 addToCart received product:", product);
     const productId = product._id || product.id || product.productId;
+    console.log("🔴 Extracted productId:", productId);
+
     const normalized = normalizeItem({ ...product, _id: productId, quantity: qty });
 
     if (isAuthed) {
