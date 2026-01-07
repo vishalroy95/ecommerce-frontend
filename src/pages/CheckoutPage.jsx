@@ -303,7 +303,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 // ✅ RENDER BACKEND URL
-const API_BASE = "https://e-commerce-backend-4-vpik.onrender.com";
+const API_BASE = "https://e-commerce-backend-4-vplk.onrender.com";
 
 const CheckoutPage = () => {
   const [addresses, setAddresses] = useState([]);
