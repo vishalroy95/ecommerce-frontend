@@ -141,7 +141,7 @@ const LoginPage = () => {
     setMessage("");
 
     try {
-      const res = await fetch(`${API_URL}/api/auth/login`, {   // 👈 fixed URL
+      const res = await fetch(`${API_URL}/auth/login`, {   // 👈 fixed URL
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
