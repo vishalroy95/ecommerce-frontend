@@ -240,6 +240,7 @@ const Header = () => {
     }
   }, [location.pathname]);
 
+  // close dropdown on outside click
   useEffect(() => {
     function handleClickOutside(e) {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
@@ -247,7 +248,8 @@ const Header = () => {
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    return () =>
+      document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   const filteredSuggestions = products.filter((p) =>
@@ -285,73 +287,22 @@ const Header = () => {
     (sum, item) => sum + (item.quantity || 1),
     0
   );
+  const totalWishlistItems = wishlist.length;
 
   return (
-    <header className="bg-white shadow-md sticky top-0 z-50">
-      <div className="max-w-[1280px] mx-auto px-4 py-3">
-        {/* Top Row */}
-        <div className="flex items-center justify-between">
-          {/* Logo */}
-          <Link
-            to="/"
-            className="text-pink-600 font-bold text-xl sm:text-2xl"
-          >
-            IDEACRAFT
-          </Link>
+    <header className="bg-white shadow-md px-4 sm:px-6 py-3 sticky top-0 z-50">
+      <div className="max-w-[1280px] mx-auto flex items-center justify-between gap-3 flex-nowrap">
+        
+        {/* Logo */}
+        <Link
+          to="/"
+          className="text-pink-600 font-bold text-xl sm:text-2xl tracking-wide whitespace-nowrap"
+        >
+          IDEACRAFT
+        </Link>
 
-          {/* Icons */}
-          <div className="flex items-center gap-5 text-gray-600 text-lg">
-            <Link to="/wishlist" className="relative">
-              <FaHeart />
-              {wishlist.length > 0 && (
-                <span className="absolute -top-2 -right-3 bg-pink-600 text-white text-xs px-1.5 rounded-full">
-                  {wishlist.length}
-                </span>
-              )}
-            </Link>
-
-            <Link to="/cart" className="relative">
-              <FaShoppingCart />
-              {totalCartItems > 0 && (
-                <span className="absolute -top-2 -right-3 bg-pink-600 text-white text-xs px-1.5 rounded-full">
-                  {totalCartItems}
-                </span>
-              )}
-            </Link>
-
-            {user ? (
-              <AccountDropdown />
-            ) : (
-              <div className="relative" ref={dropdownRef}>
-                <button
-                  onClick={() => setShowUserDropdown((p) => !p)}
-                  className="hover:text-pink-600"
-                >
-                  👤
-                </button>
-                {showUserDropdown && (
-                  <div className="absolute right-0 mt-2 w-36 bg-white border shadow rounded">
-                    <Link
-                      to="/login"
-                      className="block px-4 py-2 hover:bg-pink-100"
-                    >
-                      Login
-                    </Link>
-                    <Link
-                      to="/signup"
-                      className="block px-4 py-2 hover:bg-pink-100"
-                    >
-                      Sign Up
-                    </Link>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Search Bar */}
-        <div className="mt-3 relative">
+        {/* Search */}
+        <div className="relative flex-1 min-w-[140px] sm:min-w-[220px] md:w-1/2">
           <input
             type="text"
             value={searchTerm}
@@ -361,27 +312,103 @@ const Header = () => {
             }}
             onKeyDown={handleSearchKeyDown}
             placeholder="Search products..."
-            className="w-full px-4 py-2 border rounded-full focus:ring-2 focus:ring-pink-500"
+            className="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-pink-500 text-sm sm:text-base"
           />
 
           {searchTerm && (
-            <div className="absolute top-11 left-0 w-full bg-white border rounded shadow z-50">
-              {filteredSuggestions.slice(0, 6).map((p, idx) => (
-                <div
-                  key={p._id}
-                  className={`px-4 py-2 cursor-pointer ${
-                    idx === activeIndex
-                      ? "bg-gray-200"
-                      : "hover:bg-gray-100"
-                  }`}
-                  onClick={() => {
-                    navigate(`/search?q=${encodeURIComponent(p.title)}`);
-                    setSearchTerm("");
-                  }}
-                >
-                  {p.title}
+            <div className="absolute top-11 left-0 w-full bg-white border rounded-md shadow-lg max-h-60 overflow-y-auto z-50">
+              {filteredSuggestions.length > 0 ? (
+                filteredSuggestions.slice(0, 6).map((p, idx) => (
+                  <div
+                    key={p._id}
+                    className={`px-4 py-2 cursor-pointer ${
+                      idx === activeIndex
+                        ? "bg-gray-200"
+                        : "hover:bg-gray-100"
+                    }`}
+                    onClick={() => {
+                      navigate(`/search?q=${encodeURIComponent(p.title)}`);
+                      setSearchTerm("");
+                      setActiveIndex(-1);
+                    }}
+                  >
+                    {p.title}
+                  </div>
+                ))
+              ) : (
+                <div className="px-4 py-2 text-gray-500">
+                  No suggestions found
                 </div>
-              ))}
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Icons */}
+        <div className="flex items-center gap-4 sm:gap-6 text-gray-600 text-lg sm:text-xl flex-shrink-0">
+          
+          {/* Wishlist */}
+          <Link to="/wishlist" className="relative hover:text-pink-600">
+            <FaHeart />
+            {totalWishlistItems > 0 && (
+              <span className="absolute -top-2 -right-3 bg-pink-600 text-white text-xs font-bold px-2 py-0.5 rounded-full">
+                {totalWishlistItems}
+              </span>
+            )}
+          </Link>
+
+          {/* Cart */}
+          <Link to="/cart" className="relative hover:text-pink-600">
+            <FaShoppingCart />
+            {totalCartItems > 0 && (
+              <span className="absolute -top-2 -right-3 bg-pink-600 text-white text-xs font-bold px-2 py-0.5 rounded-full">
+                {totalCartItems}
+              </span>
+            )}
+          </Link>
+
+          {/* User */}
+          {user ? (
+            <AccountDropdown />
+          ) : (
+            <div className="relative" ref={dropdownRef}>
+              <div
+                onClick={() => setShowUserDropdown((p) => !p)}
+                className="cursor-pointer hover:text-pink-600"
+              >
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M5.121 17.804A9.978 9.978 0 0112 15c2.21 0 4.25.713 5.879 1.804M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                  />
+                </svg>
+              </div>
+
+              {showUserDropdown && (
+                <div className="absolute top-full right-0 mt-2 w-40 bg-white shadow-lg border rounded-md py-2 z-[1000]">
+                  <Link
+                    to="/login"
+                    className="block px-4 py-2 hover:bg-pink-100"
+                    onClick={() => setShowUserDropdown(false)}
+                  >
+                    Login
+                  </Link>
+                  <Link
+                    to="/signup"
+                    className="block px-4 py-2 hover:bg-pink-100"
+                    onClick={() => setShowUserDropdown(false)}
+                  >
+                    Sign Up
+                  </Link>
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -391,4 +418,3 @@ const Header = () => {
 };
 
 export default Header;
-
