@@ -54,7 +54,7 @@ export const AddressProvider = ({ children }) => {
 
   const fetchAddresses = async () => {
     try {
-      const res = await axios.get(`${API_URL}/api/addresses`, {
+      const res = await axios.get(`${API_URL}/addresses`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setAddresses(res.data.addresses);
