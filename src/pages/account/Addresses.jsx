@@ -205,7 +205,7 @@ const Addresses = () => {
   const fetchAddresses = async () => {
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.get(`${API_URL}/api/addresses`, {  // <- URL updated
+      const res = await axios.get(`${API_URL}/addresses`, {  // <- URL updated
         headers: { Authorization: `Bearer ${token}` },
       });
       setAddresses(res.data.addresses || []);
@@ -265,11 +265,11 @@ const Addresses = () => {
       delete payload.__v;
 
       if (isEditMode) {
-        await axios.put(`${API_URL}/api/addresses/${editId}`, payload, {  // <- URL updated
+        await axios.put(`${API_URL}/addresses/${editId}`, payload, {  // <- URL updated
           headers: { Authorization: `Bearer ${token}` },
         });
       } else {
-        await axios.post(`${API_URL}/api/addresses`, payload, {  // <- URL updated
+        await axios.post(`${API_URL}/addresses`, payload, {  // <- URL updated
           headers: { Authorization: `Bearer ${token}` },
         });
       }
@@ -296,7 +296,7 @@ const Addresses = () => {
     const token = localStorage.getItem('token');
     if (!window.confirm('Delete this address?')) return;
     try {
-      await axios.delete(`${API_URL}/api/addresses/${id}`, {  // <- URL updated
+      await axios.delete(`${API_URL}/addresses/${id}`, {  // <- URL updated
         headers: { Authorization: `Bearer ${token}` },
       });
       fetchAddresses();
