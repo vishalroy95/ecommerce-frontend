@@ -113,7 +113,7 @@ export const WishlistProvider = ({ children }) => {
   useEffect(() => {
     if (token) {
       axios
-        .get(`${API_URL}/api/wishlist`, {
+        .get(`${API_URL}/wishlist`, {
           headers: { Authorization: `Bearer ${token}` },
         })
         .then((res) => setWishlist(res.data.items || []))
@@ -143,7 +143,7 @@ export const WishlistProvider = ({ children }) => {
 
         if (exists) {
           // Remove from DB
-          await axios.delete(`${API_URL}/api/wishlist/${product._id}`, {
+          await axios.delete(`${API_URL}/wishlist/${product._id}`, {
             headers: { Authorization: `Bearer ${token}` },
           });
 
@@ -156,7 +156,7 @@ export const WishlistProvider = ({ children }) => {
         } else {
           // Add to DB
           const res = await axios.post(
-            `${API_URL}/api/wishlist`,
+            `${API_URL}/wishlist`,
             { productId: product._id },
             { headers: { Authorization: `Bearer ${token}` } }
           );
