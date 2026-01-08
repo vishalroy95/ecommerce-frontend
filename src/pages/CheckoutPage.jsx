@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
-import { API_URL } from "../config"; // ✅ IMPORTANT
+import { API_URL } from "../config"; //  IMPORTANT
 
 const CheckoutPage = () => {
   const [addresses, setAddresses] = useState([]);
@@ -28,7 +28,7 @@ const CheckoutPage = () => {
   // Fetch all addresses
   const fetchAddresses = async () => {
     try {
-      const res = await axios.get('${API_URL}/addresses', {
+      const res = await axios.get(`${API_URL}/addresses`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setAddresses(res.data.addresses || []);
@@ -88,7 +88,7 @@ const CheckoutPage = () => {
           headers: { Authorization: `Bearer ${token}` },
         });
       } else {
-        await axios.post('${API_URL}/addresses', payload, {
+        await axios.post(`${API_URL}/addresses`, payload, {
           headers: { Authorization: `Bearer ${token}` },
         });
       }
