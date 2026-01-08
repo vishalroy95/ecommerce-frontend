@@ -1,4 +1,3 @@
-
 // import { useState } from "react";
 // import { useNavigate, useLocation } from "react-router-dom";
 // import axios from "axios";
@@ -9,7 +8,7 @@
 //   const location = useLocation();
 //   const { addressId, token } = location.state || {};
 
-//   const { cart } = useCart(); // 👈 cart context se cart data
+//   const { cart, clearCart } = useCart(); // 👈 clearCart bhi le lo
 //   const [paymentMode, setPaymentMode] = useState("COD");
 //   const [loading, setLoading] = useState(false);
 
@@ -46,6 +45,9 @@
 //         }
 //       );
 
+//       // ✅ order successful hone ke baad cart clear kar do
+//       clearCart();
+
 //       navigate("/ordersuccess", { state: { order: res.data } });
 //     } catch (error) {
 //       console.error("Order place error:", error);
@@ -53,9 +55,6 @@
 //       setLoading(false);
 //     }
 //   };
-
-
-  
 
 //   return (
 //     <div className="max-w-lg mx-auto p-6 bg-white shadow rounded mt-10">
@@ -90,7 +89,7 @@
 //         disabled={loading}
 //         className="w-full mt-6 bg-orange-500 hover:bg-orange-600 text-white py-2 rounded-lg font-semibold"
 //       >
-//         {loading ? "Placing Order..." : "Confirm Order"}
+//         {loading ? "Placing Order..." : `Confirm Order (₹${totalAmount})`}
 //       </button>
 //     </div>
 //   );
@@ -101,17 +100,24 @@
 
 
 
+
+// updated code
+
+
+
+
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import { useCart } from "../context/CartContext"; // cart data le lo
+import { API_URL } from "../config"; //  ONLY NEW LINE
 
 const PaymentSelectPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { addressId, token } = location.state || {};
 
-  const { cart, clearCart } = useCart(); // 👈 clearCart bhi le lo
+  const { cart, clearCart } = useCart(); //  clearCart 
   const [paymentMode, setPaymentMode] = useState("COD");
   const [loading, setLoading] = useState(false);
 
@@ -127,13 +133,13 @@ const PaymentSelectPage = () => {
 
       // cart ko backend ke format me map karna hoga
       const orderItems = cart.map((item) => ({
-        productId: item._id || item.id, // 👈 backend ko productId chahiye
+        productId: item._id || item.id, //  backend ko productId chahiye
         quantity: item.quantity,
         price: item.price || (item.product?.price ?? 0),
       }));
 
       const res = await axios.post(
-        "/api/orders",
+        `${API_URL}/orders`, //   FIX HERE
         {
           addressId,
           items: orderItems,
@@ -148,7 +154,7 @@ const PaymentSelectPage = () => {
         }
       );
 
-      // ✅ order successful hone ke baad cart clear kar do
+      //  order successful hone ke baad cart clear kar do
       clearCart();
 
       navigate("/ordersuccess", { state: { order: res.data } });
