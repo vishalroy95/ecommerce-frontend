@@ -205,164 +205,138 @@
 
 // import { createContext, useContext, useEffect, useState } from "react";
 // import axios from "axios";
+// import { API_URL } from "../config";
 
 // export const CartContext = createContext();
 // export const useCart = () => useContext(CartContext);
 
-// const BASE_URL = "https://e-commerce-backend-4-vplk.onrender.com/api/cart";
+// const BASE_URL = `${API_URL}/cart`;
 
 // export const CartProvider = ({ children }) => {
 //   const [cart, setCart] = useState([]);
 //   const [loading, setLoading] = useState(false);
+//   const [token, setToken] = useState(localStorage.getItem("token"));
 
-//   const token = localStorage.getItem("token");
 //   const isAuthed = !!token;
 
-//   const normalizeItem = (raw) => {
-//     const pid = raw.productId?._id || raw.productId || raw._id || raw.id;
-//     return {
-//       id: pid?.toString() || `guest-${Date.now()}-${Math.random()}`,
-//       title: raw.productId?.title || raw.title || raw.name || "Unknown Product",
-//       price: Number(raw.productId?.price || raw.price || 0),
-//       image: raw.productId?.image || raw.image || "/placeholder.png",
-//       quantity: Number(raw.quantity || 1),
-//     };
-//   };
-
-//   const readGuestCart = () => {
-//     try {
-//       const stored = JSON.parse(localStorage.getItem("guestCart") || "[]");
-//       return stored.map(normalizeItem);
-//     } catch {
-//       return [];
-//     }
-//   };
-
-//   const writeGuestCart = (items) => {
-//     localStorage.setItem("guestCart", JSON.stringify(items));
-//   };
-
+//   // 🔁 token sync (login/logout ke baad)
 //   useEffect(() => {
-//     (async () => {
+//     const syncToken = () => {
+//       setToken(localStorage.getItem("token"));
+//     };
+//     window.addEventListener("storage", syncToken);
+//     return () => window.removeEventListener("storage", syncToken);
+//   }, []);
+
+//   const normalizeItem = (item) => ({
+//     id: item.productId?._id,
+//     title: item.productId?.title,
+//     price: Number(item.productId?.price),
+//     image: item.productId?.image || "/placeholder.png",
+//     quantity: Number(item.quantity),
+//   });
+
+//   // ---------------- LOAD CART ----------------
+//   useEffect(() => {
+//     const loadCart = async () => {
 //       setLoading(true);
-//       if (isAuthed) {
-//         try {
-//           console.log("🟡 Token being sent:", token);
-//           const res = await axios.get(`${BASE_URL}`, {
-//            headers: { Authorization: `Bearer ${token}` },
-//           });
-//           setCart((res.data?.cart?.items || []).map(normalizeItem));
-//         } catch (err) {
-//           console.error("Error fetching cart:", err);
-//           setCart([]);
-//         }
-//       } else {
-//         setCart(readGuestCart());
+
+//       if (!isAuthed) {
+//         setCart([]);
+//         setLoading(false);
+//         return;
 //       }
-//       setLoading(false);
-//     })();
+
+//       try {
+//         console.log("🟡 Token being sent:", token);
+//         const res = await axios.get(`${BASE_URL}`, {
+//           headers: { Authorization: `Bearer ${token}` },
+//         });
+
+//         setCart((res.data?.cart?.items || []).map(normalizeItem));
+//       } catch (err) {
+//         console.error("❌ Error fetching cart:", err);
+//         setCart([]);
+//       } finally {
+//         setLoading(false);
+//       }
+//     };
+
+//     loadCart();
 //   }, [isAuthed, token]);
 
+//   // ---------------- ADD TO CART ----------------
 //   const addToCart = async (product, qty = 1) => {
-//     console.log("🟢 addToCart received product:", product);
-//     const productId = product._id || product.id || product.productId;
-//     console.log("🔴 Extracted productId:", productId);
+//     const productId = product._id;
 
-//     const normalized = normalizeItem({ ...product, _id: productId, quantity: qty });
-
-//     if (isAuthed) {
-//       try {
-//         const res = await axios.post(
-//           `${BASE_URL}/add`,
-//           { productId: productId.toString(), quantity: qty },
-//           { headers: { Authorization: `Bearer ${token}` } }
-//         );
-//         setCart((res.data?.cart?.items || []).map(normalizeItem));
-//       } catch (err) {
-//         console.error("Error adding to server cart:", err);
-//       }
-//     } else {
-//       const updated = [...cart];
-//       const idx = updated.findIndex((i) => i.id === normalized.id);
-//       if (idx >= 0) updated[idx].quantity += qty;
-//       else updated.push(normalized);
-
-//       setCart(updated);
-//       writeGuestCart(updated);
+//     if (!productId) {
+//       console.error("❌ Product ID missing", product);
+//       return;
 //     }
-//   };
 
-//   const removeFromCart = async (id) => {
-//     if (!id) return;
-
-//     if (isAuthed) {
-//       try {
-//         const res = await axios.post(
-//           `${BASE_URL}/remove`,
-//           { productId: id.toString() },
-//           { headers: { Authorization: `Bearer ${token}` } }
-//         );
-//         setCart((res.data?.cart?.items || []).map(normalizeItem));
-//       } catch (err) {
-//         console.error("Error removing from cart:", err);
-//       }
-//     } else {
-//       const updated = cart.filter((i) => i.id.toString() !== id.toString());
-//       setCart(updated);
-//       writeGuestCart(updated);
-//     }
-//   };
-
-//   const setQuantity = async (id, qty) => {
-//     if (qty <= 0) return removeFromCart(id);
-
-//     if (isAuthed) {
-//       try {
-//         const res = await axios.post(
-//           `${BASE_URL}/update`,
-//           { productId: id.toString(), quantity: qty },
-//           { headers: { Authorization: `Bearer ${token}` } }
-//         );
-//         setCart((res.data?.cart?.items || []).map(normalizeItem));
-//       } catch (err) {
-//         console.error("Error updating cart:", err);
-//       }
-//     } else {
-//       const updated = cart.map((i) =>
-//         i.id === id.toString() ? { ...i, quantity: qty } : i
+//     try {
+//       const res = await axios.post(
+//         `${BASE_URL}/add`,
+//         { productId, quantity: qty },
+//         { headers: { Authorization: `Bearer ${token}` } }
 //       );
-//       setCart(updated);
-//       writeGuestCart(updated);
+
+//       setCart((res.data?.cart?.items || []).map(normalizeItem));
+//     } catch (err) {
+//       console.error("❌ Error adding to cart:", err);
+//     }
+//   };
+
+//   // ---------------- REMOVE ----------------
+//   const removeFromCart = async (productId) => {
+//     try {
+//       const res = await axios.post(
+//         `${BASE_URL}/remove`,
+//         { productId },
+//         { headers: { Authorization: `Bearer ${token}` } }
+//       );
+//       setCart((res.data?.cart?.items || []).map(normalizeItem));
+//     } catch (err) {
+//       console.error("❌ Remove error:", err);
+//     }
+//   };
+
+//   // ---------------- UPDATE QUANTITY ----------------
+//   const setQuantity = async (productId, quantity) => {
+//     if (quantity <= 0) return removeFromCart(productId);
+
+//     try {
+//       const res = await axios.post(
+//         `${BASE_URL}/update`,
+//         { productId, quantity },
+//         { headers: { Authorization: `Bearer ${token}` } }
+//       );
+//       setCart((res.data?.cart?.items || []).map(normalizeItem));
+//     } catch (err) {
+//       console.error("❌ Update quantity error:", err);
 //     }
 //   };
 
 //   const increaseQuantity = (id) => {
-//     const item = cart.find((i) => i.id === id.toString());
-//     if (!item) return;
-//     setQuantity(id, item.quantity + 1);
+//     const item = cart.find((i) => i.id === id);
+//     if (item) setQuantity(id, item.quantity + 1);
 //   };
 
 //   const decreaseQuantity = (id) => {
-//     const item = cart.find((i) => i.id === id.toString());
-//     if (!item) return;
-//     setQuantity(id, item.quantity - 1);
+//     const item = cart.find((i) => i.id === id);
+//     if (item) setQuantity(id, item.quantity - 1);
 //   };
 
 //   const clearCart = async () => {
-//     if (isAuthed) {
-//       try {
-//         await axios.post(
-//           `${BASE_URL}/clear`,
-//           {},
-//           { headers: { Authorization: `Bearer ${token}` } }
-//         );
-//         setCart([]);
-//       } catch (err) {
-//         console.error("Error clearing cart:", err);
-//       }
-//     } else {
+//     try {
+//       await axios.post(
+//         `${BASE_URL}/clear`,
+//         {},
+//         { headers: { Authorization: `Bearer ${token}` } }
+//       );
 //       setCart([]);
-//       writeGuestCart([]);
+//     } catch (err) {
+//       console.error("❌ Clear cart error:", err);
 //     }
 //   };
 
@@ -381,7 +355,6 @@
 //         removeFromCart,
 //         increaseQuantity,
 //         decreaseQuantity,
-//         setQuantity,
 //         clearCart,
 //         getTotalItems,
 //         getTotalPrice,
@@ -396,7 +369,6 @@
 
 
 
-
 import { createContext, useContext, useEffect, useState } from "react";
 import axios from "axios";
 import { API_URL } from "../config";
@@ -405,6 +377,7 @@ export const CartContext = createContext();
 export const useCart = () => useContext(CartContext);
 
 const BASE_URL = `${API_URL}/cart`;
+const GUEST_KEY = "guestCart";
 
 export const CartProvider = ({ children }) => {
   const [cart, setCart] = useState([]);
@@ -413,7 +386,7 @@ export const CartProvider = ({ children }) => {
 
   const isAuthed = !!token;
 
-  // 🔁 token sync (login/logout ke baad)
+  // 🔁 token sync (login / logout)
   useEffect(() => {
     const syncToken = () => {
       setToken(localStorage.getItem("token"));
@@ -422,27 +395,39 @@ export const CartProvider = ({ children }) => {
     return () => window.removeEventListener("storage", syncToken);
   }, []);
 
+  // ---------------- HELPERS ----------------
   const normalizeItem = (item) => ({
-    id: item.productId?._id,
-    title: item.productId?.title,
-    price: Number(item.productId?.price),
-    image: item.productId?.image || "/placeholder.png",
+    id: item.productId?._id || item.id,
+    title: item.productId?.title || item.title,
+    price: Number(item.productId?.price || item.price),
+    image: item.productId?.image || item.image || "/placeholder.png",
     quantity: Number(item.quantity),
   });
+
+  const loadGuestCart = () => {
+    const data = JSON.parse(localStorage.getItem(GUEST_KEY)) || [];
+    setCart(data);
+  };
+
+  const saveGuestCart = (items) => {
+    localStorage.setItem(GUEST_KEY, JSON.stringify(items));
+    setCart(items);
+  };
 
   // ---------------- LOAD CART ----------------
   useEffect(() => {
     const loadCart = async () => {
       setLoading(true);
 
+      // 🟡 Guest user
       if (!isAuthed) {
-        setCart([]);
+        loadGuestCart();
         setLoading(false);
         return;
       }
 
+      // 🟢 Logged in user
       try {
-        console.log("🟡 Token being sent:", token);
         const res = await axios.get(`${BASE_URL}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -459,22 +444,65 @@ export const CartProvider = ({ children }) => {
     loadCart();
   }, [isAuthed, token]);
 
+  // ---------------- MERGE GUEST CART AFTER LOGIN ----------------
+  useEffect(() => {
+    if (!isAuthed) return;
+
+    const guestCart = JSON.parse(localStorage.getItem(GUEST_KEY)) || [];
+    if (!guestCart.length) return;
+
+    const merge = async () => {
+      for (const item of guestCart) {
+        try {
+          await axios.post(
+            `${BASE_URL}/add`,
+            { productId: item.id, quantity: item.quantity },
+            { headers: { Authorization: `Bearer ${token}` } }
+          );
+        } catch (e) {
+          console.error("❌ Merge error:", e);
+        }
+      }
+      localStorage.removeItem(GUEST_KEY);
+    };
+
+    merge();
+  }, [isAuthed, token]);
+
   // ---------------- ADD TO CART ----------------
   const addToCart = async (product, qty = 1) => {
     const productId = product._id;
 
-    if (!productId) {
-      console.error("❌ Product ID missing", product);
+    if (!productId) return;
+
+    // 🟡 Guest
+    if (!isAuthed) {
+      const existing = [...cart];
+      const found = existing.find((i) => i.id === productId);
+
+      if (found) {
+        found.quantity += qty;
+      } else {
+        existing.push({
+          id: productId,
+          title: product.title,
+          price: product.price,
+          image: product.image,
+          quantity: qty,
+        });
+      }
+
+      saveGuestCart(existing);
       return;
     }
 
+    // 🟢 Logged in
     try {
       const res = await axios.post(
         `${BASE_URL}/add`,
         { productId, quantity: qty },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-
       setCart((res.data?.cart?.items || []).map(normalizeItem));
     } catch (err) {
       console.error("❌ Error adding to cart:", err);
@@ -483,6 +511,12 @@ export const CartProvider = ({ children }) => {
 
   // ---------------- REMOVE ----------------
   const removeFromCart = async (productId) => {
+    if (!isAuthed) {
+      const updated = cart.filter((i) => i.id !== productId);
+      saveGuestCart(updated);
+      return;
+    }
+
     try {
       const res = await axios.post(
         `${BASE_URL}/remove`,
@@ -498,6 +532,14 @@ export const CartProvider = ({ children }) => {
   // ---------------- UPDATE QUANTITY ----------------
   const setQuantity = async (productId, quantity) => {
     if (quantity <= 0) return removeFromCart(productId);
+
+    if (!isAuthed) {
+      const updated = cart.map((i) =>
+        i.id === productId ? { ...i, quantity } : i
+      );
+      saveGuestCart(updated);
+      return;
+    }
 
     try {
       const res = await axios.post(
@@ -522,6 +564,12 @@ export const CartProvider = ({ children }) => {
   };
 
   const clearCart = async () => {
+    if (!isAuthed) {
+      localStorage.removeItem(GUEST_KEY);
+      setCart([]);
+      return;
+    }
+
     try {
       await axios.post(
         `${BASE_URL}/clear`,
@@ -558,4 +606,5 @@ export const CartProvider = ({ children }) => {
     </CartContext.Provider>
   );
 };
+
 
