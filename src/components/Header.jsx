@@ -445,7 +445,10 @@ const Header = () => {
 
   const navigate = useNavigate();
   const location = useLocation();
-  const dropdownRef = useRef(null);
+
+  // 🔑 FIX: separate refs for mobile & desktop
+  const mobileDropdownRef = useRef(null);
+  const desktopDropdownRef = useRef(null);
 
   const user = JSON.parse(localStorage.getItem("user"));
 
@@ -455,7 +458,12 @@ const Header = () => {
 
   useEffect(() => {
     function handleClickOutside(e) {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+      if (
+        mobileDropdownRef.current &&
+        !mobileDropdownRef.current.contains(e.target) &&
+        desktopDropdownRef.current &&
+        !desktopDropdownRef.current.contains(e.target)
+      ) {
         setShowUserDropdown(false);
       }
     }
@@ -515,7 +523,7 @@ const Header = () => {
             IDEACRAFT
           </Link>
 
-          {/* Mobile Icons */}
+          {/* MOBILE ICONS */}
           <div className="flex items-center gap-5 text-gray-600 text-xl md:hidden">
             <Link to="/wishlist" className="relative">
               <FaHeart />
@@ -536,53 +544,50 @@ const Header = () => {
             </Link>
 
             {!user && (
-  <div className="relative" ref={dropdownRef}>
-    <svg
-      onClick={() => setShowUserDropdown((p) => !p)}
-      className="w-5 h-5 cursor-pointer"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      viewBox="0 0 24 24"
-    >
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M5.121 17.804A9.978 9.978 0 0112 15c2.21 0 4.25.713 5.879 1.804M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-      />
-    </svg>
+              <div className="relative" ref={mobileDropdownRef}>
+                <svg
+                  onClick={() => setShowUserDropdown((p) => !p)}
+                  className="w-5 h-5 cursor-pointer"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M5.121 17.804A9.978 9.978 0 0112 15c2.21 0 4.25.713 5.879 1.804M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                  />
+                </svg>
 
-    {showUserDropdown && (
-      <div className="absolute right-0 top-8 w-40 bg-white shadow-lg border rounded-md py-2 z-[9999]">
-        <div
-  onClick={() => {
-    setShowUserDropdown(false);
-    navigate("/login");
-  }}
-  className="block px-4 py-2 hover:bg-pink-100 cursor-pointer"
->
-  Login
-</div>
-
-        <div
-  onClick={() => {
-    setShowUserDropdown(false);
-    navigate("/signup");
-  }}
-  className="block px-4 py-2 hover:bg-pink-100 cursor-pointer"
->
-  Sign Up
-</div>
-
-      </div>
-    )}
-  </div>
-)}
-
+                {showUserDropdown && (
+                  <div className="absolute right-0 top-8 w-40 bg-white shadow-lg border rounded-md py-2 z-[9999]">
+                    <div
+                      onClick={() => {
+                        setShowUserDropdown(false);
+                        navigate("/login");
+                      }}
+                      className="px-4 py-2 hover:bg-pink-100 cursor-pointer"
+                    >
+                      Login
+                    </div>
+                    <div
+                      onClick={() => {
+                        setShowUserDropdown(false);
+                        navigate("/signup");
+                      }}
+                      className="px-4 py-2 hover:bg-pink-100 cursor-pointer"
+                    >
+                      Sign Up
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
 
-        {/* SEARCH (FULL WIDTH ON DESKTOP) */}
+        {/* SEARCH */}
         <div className="mt-3 md:mt-0 md:col-span-2 relative">
           <input
             type="text"
@@ -642,7 +647,7 @@ const Header = () => {
           {user ? (
             <AccountDropdown />
           ) : (
-            <div className="relative" ref={dropdownRef}>
+            <div className="relative" ref={desktopDropdownRef}>
               <svg
                 onClick={() => setShowUserDropdown((p) => !p)}
                 className="w-5 h-5 cursor-pointer"
@@ -660,10 +665,16 @@ const Header = () => {
 
               {showUserDropdown && (
                 <div className="absolute right-0 mt-2 w-40 bg-white shadow-lg border rounded-md py-2">
-                  <Link to="/login" className="block px-4 py-2 hover:bg-pink-100">
+                  <Link
+                    to="/login"
+                    className="block px-4 py-2 hover:bg-pink-100"
+                  >
                     Login
                   </Link>
-                  <Link to="/signup" className="block px-4 py-2 hover:bg-pink-100">
+                  <Link
+                    to="/signup"
+                    className="block px-4 py-2 hover:bg-pink-100"
+                  >
                     Sign Up
                   </Link>
                 </div>
@@ -677,4 +688,3 @@ const Header = () => {
 };
 
 export default Header;
-
