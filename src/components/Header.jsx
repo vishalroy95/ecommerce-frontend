@@ -450,9 +450,7 @@ const Header = () => {
   const user = JSON.parse(localStorage.getItem("user"));
 
   useEffect(() => {
-    if (location.pathname === "/") {
-      setSearchTerm("");
-    }
+    if (location.pathname === "/") setSearchTerm("");
   }, [location.pathname]);
 
   useEffect(() => {
@@ -489,7 +487,7 @@ const Header = () => {
             filteredSuggestions[activeIndex].title
           )}`
         );
-      } else if (searchTerm.trim() !== "") {
+      } else if (searchTerm.trim()) {
         navigate(`/search?q=${encodeURIComponent(searchTerm.trim())}`);
       }
       setSearchTerm("");
@@ -501,14 +499,15 @@ const Header = () => {
     (sum, item) => sum + (item.quantity || 1),
     0
   );
+
   const totalWishlistItems = wishlist.length;
 
   return (
     <header className="bg-white shadow-md sticky top-0 z-50">
-      <div className="max-w-[1280px] mx-auto px-4 py-3 md:grid md:grid-cols-3 md:items-center md:gap-6">
-        
-        {/* 🔹 LOGO */}
-        <div className="flex items-center justify-between md:justify-start">
+      <div className="max-w-[1280px] mx-auto px-4 py-3 md:grid md:grid-cols-4 md:items-center md:gap-6">
+
+        {/* LOGO */}
+        <div className="flex items-center justify-between md:justify-start md:col-span-1">
           <Link
             to="/"
             className="text-pink-600 font-bold text-2xl tracking-wide"
@@ -516,9 +515,9 @@ const Header = () => {
             IDEACRAFT
           </Link>
 
-          {/* 🔹 ICONS (mobile only here) */}
-          <div className="flex items-center gap-5 text-gray-600 text-xl md:hidden relative">
-            <Link to="/wishlist" className="relative hover:text-pink-600">
+          {/* Mobile Icons */}
+          <div className="flex items-center gap-5 text-gray-600 text-xl md:hidden">
+            <Link to="/wishlist" className="relative">
               <FaHeart />
               {totalWishlistItems > 0 && (
                 <span className="absolute -top-2 -right-3 bg-pink-600 text-white text-xs font-bold px-2 py-0.5 rounded-full">
@@ -527,7 +526,7 @@ const Header = () => {
               )}
             </Link>
 
-            <Link to="/cart" className="relative hover:text-pink-600">
+            <Link to="/cart" className="relative">
               <FaShoppingCart />
               {totalCartItems > 0 && (
                 <span className="absolute -top-2 -right-3 bg-pink-600 text-white text-xs font-bold px-2 py-0.5 rounded-full">
@@ -536,102 +535,64 @@ const Header = () => {
               )}
             </Link>
 
-            {user ? (
-              <AccountDropdown />
-            ) : (
-              <div className="relative" ref={dropdownRef}>
+            {!user && (
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M5.121 17.804A9.978 9.978 0 0112 15c2.21 0 4.25.713 5.879 1.804M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                />
+              </svg>
+            )}
+          </div>
+        </div>
+
+        {/* SEARCH (FULL WIDTH ON DESKTOP) */}
+        <div className="mt-3 md:mt-0 md:col-span-2 relative">
+          <input
+            type="text"
+            value={searchTerm}
+            onChange={(e) => {
+              setSearchTerm(e.target.value);
+              setActiveIndex(-1);
+            }}
+            onKeyDown={handleSearchKeyDown}
+            placeholder="Search for beauty products, brands, etc..."
+            className="w-full px-5 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-pink-500"
+          />
+
+          {searchTerm && (
+            <div className="absolute top-12 left-0 w-full bg-white border rounded-md shadow-lg z-[9999]">
+              {filteredSuggestions.slice(0, 6).map((p, idx) => (
                 <div
-                  onClick={() => setShowUserDropdown((prev) => !prev)}
-                  className="cursor-pointer hover:text-pink-600"
+                  key={p._id}
+                  className={`px-4 py-2 cursor-pointer ${
+                    idx === activeIndex
+                      ? "bg-gray-200"
+                      : "hover:bg-gray-100"
+                  }`}
+                  onClick={() => {
+                    navigate(`/search?q=${encodeURIComponent(p.title)}`);
+                    setSearchTerm("");
+                    setActiveIndex(-1);
+                  }}
                 >
-                  <svg
-                    className="w-5 h-5"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M5.121 17.804A9.978 9.978 0 0112 15c2.21 0 4.25.713 5.879 1.804M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                    />
-                  </svg>
+                  {p.title}
                 </div>
-
-                {showUserDropdown && (
-                  <div className="absolute right-0 mt-2 w-40 bg-white shadow-lg border rounded-md py-2 z-[9999]">
-                    <Link
-                      to="/login"
-                      className="block px-4 py-2 hover:bg-pink-100"
-                      onClick={() => setShowUserDropdown(false)}
-                    >
-                      Login
-                    </Link>
-                    <Link
-                      to="/signup"
-                      className="block px-4 py-2 hover:bg-pink-100"
-                      onClick={() => setShowUserDropdown(false)}
-                    >
-                      Sign Up
-                    </Link>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
 
-        {/* 🔹 SEARCH */}
-        <div className="mt-3 md:mt-0 md:flex md:justify-center relative">
-          <div className="w-full md:w-[520px] lg:w-[620px]">
-            <input
-              type="text"
-              value={searchTerm}
-              onChange={(e) => {
-                setSearchTerm(e.target.value);
-                setActiveIndex(-1);
-              }}
-              onKeyDown={handleSearchKeyDown}
-              placeholder="Search for beauty products, brands, etc..."
-              className="w-full px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-pink-500 transition"
-            />
-
-            {searchTerm && (
-              <div className="absolute top-12 left-0 w-full bg-white border rounded-md shadow-lg max-h-60 overflow-y-auto z-[9999]">
-                {filteredSuggestions.length > 0 ? (
-                  filteredSuggestions.slice(0, 6).map((p, idx) => (
-                    <div
-                      key={p._id}
-                      className={`px-4 py-2 cursor-pointer ${
-                        idx === activeIndex
-                          ? "bg-gray-200"
-                          : "hover:bg-gray-100"
-                      }`}
-                      onClick={() => {
-                        navigate(
-                          `/search?q=${encodeURIComponent(p.title)}`
-                        );
-                        setSearchTerm("");
-                        setActiveIndex(-1);
-                      }}
-                    >
-                      {p.title}
-                    </div>
-                  ))
-                ) : (
-                  <div className="px-4 py-2 text-gray-500">
-                    No suggestions found
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* 🔹 ICONS (desktop) */}
-        <div className="hidden md:flex items-center gap-5 text-gray-600 text-xl justify-end relative">
-          <Link to="/wishlist" className="relative hover:text-pink-600">
+        {/* DESKTOP ICONS */}
+        <div className="hidden md:flex items-center justify-end gap-5 text-gray-600 text-xl">
+          <Link to="/wishlist" className="relative">
             <FaHeart />
             {totalWishlistItems > 0 && (
               <span className="absolute -top-2 -right-3 bg-pink-600 text-white text-xs font-bold px-2 py-0.5 rounded-full">
@@ -640,7 +601,7 @@ const Header = () => {
             )}
           </Link>
 
-          <Link to="/cart" className="relative hover:text-pink-600">
+          <Link to="/cart" className="relative">
             <FaShoppingCart />
             {totalCartItems > 0 && (
               <span className="absolute -top-2 -right-3 bg-pink-600 text-white text-xs font-bold px-2 py-0.5 rounded-full">
@@ -653,39 +614,27 @@ const Header = () => {
             <AccountDropdown />
           ) : (
             <div className="relative" ref={dropdownRef}>
-              <div
-                onClick={() => setShowUserDropdown((prev) => !prev)}
-                className="cursor-pointer hover:text-pink-600"
+              <svg
+                onClick={() => setShowUserDropdown((p) => !p)}
+                className="w-5 h-5 cursor-pointer"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                viewBox="0 0 24 24"
               >
-                <svg
-                  className="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M5.121 17.804A9.978 9.978 0 0112 15c2.21 0 4.25.713 5.879 1.804M15 11a3 3 0 11-6 0 3 0 016 0z"
-                  />
-                </svg>
-              </div>
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M5.121 17.804A9.978 9.978 0 0112 15c2.21 0 4.25.713 5.879 1.804M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                />
+              </svg>
 
               {showUserDropdown && (
-                <div className="absolute right-0 mt-2 w-40 bg-white shadow-lg border rounded-md py-2 z-[9999]">
-                  <Link
-                    to="/login"
-                    className="block px-4 py-2 hover:bg-pink-100"
-                    onClick={() => setShowUserDropdown(false)}
-                  >
+                <div className="absolute right-0 mt-2 w-40 bg-white shadow-lg border rounded-md py-2">
+                  <Link to="/login" className="block px-4 py-2 hover:bg-pink-100">
                     Login
                   </Link>
-                  <Link
-                    to="/signup"
-                    className="block px-4 py-2 hover:bg-pink-100"
-                    onClick={() => setShowUserDropdown(false)}
-                  >
+                  <Link to="/signup" className="block px-4 py-2 hover:bg-pink-100">
                     Sign Up
                   </Link>
                 </div>
@@ -699,9 +648,4 @@ const Header = () => {
 };
 
 export default Header;
-
-
-
-
-
 
