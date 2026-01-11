@@ -370,8 +370,9 @@ const Header = () => {
         </div>
 
         {/* 🔹 SEARCH BAR (Mobile next row | Desktop center) */}
-        <div className="mt-3 md:mt-0 md:absolute md:left-1/2 md:-translate-x-1/2 md:w-1/2 relative">
-          <input
+        <div className="mt-3 md:mt-0 md:flex md:justify-center relative">
+        <div className="w-full md:w-[520px] lg:w-[620px]">
+           <input
             type="text"
             value={searchTerm}
             onChange={(e) => {
@@ -412,6 +413,7 @@ const Header = () => {
               )}
             </div>
           )}
+        </div>
         </div>
       </div>
     </header>
