@@ -536,20 +536,43 @@ const Header = () => {
             </Link>
 
             {!user && (
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M5.121 17.804A9.978 9.978 0 0112 15c2.21 0 4.25.713 5.879 1.804M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                />
-              </svg>
-            )}
+  <div className="relative" ref={dropdownRef}>
+    <svg
+      onClick={() => setShowUserDropdown((p) => !p)}
+      className="w-5 h-5 cursor-pointer"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      viewBox="0 0 24 24"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M5.121 17.804A9.978 9.978 0 0112 15c2.21 0 4.25.713 5.879 1.804M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+      />
+    </svg>
+
+    {showUserDropdown && (
+      <div className="absolute right-0 top-8 w-40 bg-white shadow-lg border rounded-md py-2 z-[9999]">
+        <Link
+          to="/login"
+          className="block px-4 py-2 hover:bg-pink-100"
+          onClick={() => setShowUserDropdown(false)}
+        >
+          Login
+        </Link>
+        <Link
+          to="/signup"
+          className="block px-4 py-2 hover:bg-pink-100"
+          onClick={() => setShowUserDropdown(false)}
+        >
+          Sign Up
+        </Link>
+      </div>
+    )}
+  </div>
+)}
+
           </div>
         </div>
 
