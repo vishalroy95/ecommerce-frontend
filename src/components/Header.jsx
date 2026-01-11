@@ -425,6 +425,7 @@
 
 
 
+
 import React, { useState, useEffect, useRef } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { FaHeart, FaShoppingCart } from "react-icons/fa";
@@ -455,11 +456,11 @@ const Header = () => {
   }, [location.pathname]);
 
   useEffect(() => {
-    const handleClickOutside = (e) => {
+    function handleClickOutside(e) {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
         setShowUserDropdown(false);
       }
-    };
+    }
     document.addEventListener("mousedown", handleClickOutside);
     return () =>
       document.removeEventListener("mousedown", handleClickOutside);
@@ -504,99 +505,62 @@ const Header = () => {
 
   return (
     <header className="bg-white shadow-md sticky top-0 z-50">
-      <div className="max-w-[1280px] mx-auto px-4 py-3">
-
-        {/* ================= DESKTOP HEADER ================= */}
-        <div className="hidden md:flex items-center justify-between gap-6">
-
-          {/* Logo */}
+      <div className="max-w-[1280px] mx-auto px-4 py-3 md:grid md:grid-cols-3 md:items-center md:gap-6">
+        
+        {/* 🔹 LOGO */}
+        <div className="flex items-center justify-between md:justify-start">
           <Link
             to="/"
-            className="text-pink-600 font-bold text-2xl tracking-wide whitespace-nowrap"
+            className="text-pink-600 font-bold text-2xl tracking-wide"
           >
             IDEACRAFT
           </Link>
 
-          {/* Search Bar */}
-          <div className="flex-1 max-w-[650px] relative">
-            <input
-              type="text"
-              value={searchTerm}
-              onChange={(e) => {
-                setSearchTerm(e.target.value);
-                setActiveIndex(-1);
-              }}
-              onKeyDown={handleSearchKeyDown}
-              placeholder="Search for beauty products, brands, etc..."
-              className="w-full px-5 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-pink-500"
-            />
-
-            {searchTerm && (
-              <div className="absolute top-12 left-0 w-full bg-white border rounded-md shadow-lg max-h-60 overflow-y-auto z-[9999]">
-                {filteredSuggestions.length > 0 ? (
-                  filteredSuggestions.slice(0, 6).map((p, idx) => (
-                    <div
-                      key={p._id}
-                      className={`px-4 py-2 cursor-pointer ${
-                        idx === activeIndex
-                          ? "bg-gray-200"
-                          : "hover:bg-gray-100"
-                      }`}
-                      onClick={() => {
-                        navigate(`/search?q=${encodeURIComponent(p.title)}`);
-                        setSearchTerm("");
-                        setActiveIndex(-1);
-                      }}
-                    >
-                      {p.title}
-                    </div>
-                  ))
-                ) : (
-                  <div className="px-4 py-2 text-gray-500">
-                    No suggestions found
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-
-          {/* Icons */}
-          <div className="flex items-center gap-6 text-gray-700 text-xl">
-
-            {/* Wishlist */}
+          {/* 🔹 ICONS (mobile only here) */}
+          <div className="flex items-center gap-5 text-gray-600 text-xl md:hidden relative">
             <Link to="/wishlist" className="relative hover:text-pink-600">
               <FaHeart />
               {totalWishlistItems > 0 && (
-                <span className="absolute -top-2 -right-3 bg-pink-600 text-white text-xs px-2 rounded-full">
+                <span className="absolute -top-2 -right-3 bg-pink-600 text-white text-xs font-bold px-2 py-0.5 rounded-full">
                   {totalWishlistItems}
                 </span>
               )}
             </Link>
 
-            {/* Cart */}
             <Link to="/cart" className="relative hover:text-pink-600">
               <FaShoppingCart />
               {totalCartItems > 0 && (
-                <span className="absolute -top-2 -right-3 bg-pink-600 text-white text-xs px-2 rounded-full">
+                <span className="absolute -top-2 -right-3 bg-pink-600 text-white text-xs font-bold px-2 py-0.5 rounded-full">
                   {totalCartItems}
                 </span>
               )}
             </Link>
 
-            {/* User */}
             {user ? (
               <AccountDropdown />
             ) : (
               <div className="relative" ref={dropdownRef}>
                 <div
-                  onClick={() => setShowUserDropdown(!showUserDropdown)}
-                  className="cursor-pointer hover:text-pink-600 text-lg"
+                  onClick={() => setShowUserDropdown((prev) => !prev)}
+                  className="cursor-pointer hover:text-pink-600"
                 >
-                  👤
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M5.121 17.804A9.978 9.978 0 0112 15c2.21 0 4.25.713 5.879 1.804M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                    />
+                  </svg>
                 </div>
 
                 {showUserDropdown && (
-                  <div className="absolute right-0 mt-2 w-40 bg-white shadow-lg border rounded-md py-2">
+                  <div className="absolute right-0 mt-2 w-40 bg-white shadow-lg border rounded-md py-2 z-[9999]">
                     <Link
                       to="/login"
                       className="block px-4 py-2 hover:bg-pink-100"
@@ -618,39 +582,126 @@ const Header = () => {
           </div>
         </div>
 
-        {/* ================= MOBILE HEADER ================= */}
-        <div className="md:hidden">
-          <div className="flex items-center justify-between">
-            <Link
-              to="/"
-              className="text-pink-600 font-bold text-2xl"
-            >
-              IDEACRAFT
-            </Link>
-
-            <div className="flex items-center gap-4 text-xl text-gray-700">
-              <Link to="/wishlist">
-                <FaHeart />
-              </Link>
-              <Link to="/cart">
-                <FaShoppingCart />
-              </Link>
-            </div>
-          </div>
-
-          <div className="mt-3">
+        {/* 🔹 SEARCH */}
+        <div className="mt-3 md:mt-0 md:flex md:justify-center relative">
+          <div className="w-full md:w-[520px] lg:w-[620px]">
             <input
               type="text"
+              value={searchTerm}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                setActiveIndex(-1);
+              }}
+              onKeyDown={handleSearchKeyDown}
               placeholder="Search for beauty products, brands, etc..."
-              className="w-full px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-pink-500"
+              className="w-full px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-pink-500 transition"
             />
+
+            {searchTerm && (
+              <div className="absolute top-12 left-0 w-full bg-white border rounded-md shadow-lg max-h-60 overflow-y-auto z-[9999]">
+                {filteredSuggestions.length > 0 ? (
+                  filteredSuggestions.slice(0, 6).map((p, idx) => (
+                    <div
+                      key={p._id}
+                      className={`px-4 py-2 cursor-pointer ${
+                        idx === activeIndex
+                          ? "bg-gray-200"
+                          : "hover:bg-gray-100"
+                      }`}
+                      onClick={() => {
+                        navigate(
+                          `/search?q=${encodeURIComponent(p.title)}`
+                        );
+                        setSearchTerm("");
+                        setActiveIndex(-1);
+                      }}
+                    >
+                      {p.title}
+                    </div>
+                  ))
+                ) : (
+                  <div className="px-4 py-2 text-gray-500">
+                    No suggestions found
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
 
+        {/* 🔹 ICONS (desktop) */}
+        <div className="hidden md:flex items-center gap-5 text-gray-600 text-xl justify-end relative">
+          <Link to="/wishlist" className="relative hover:text-pink-600">
+            <FaHeart />
+            {totalWishlistItems > 0 && (
+              <span className="absolute -top-2 -right-3 bg-pink-600 text-white text-xs font-bold px-2 py-0.5 rounded-full">
+                {totalWishlistItems}
+              </span>
+            )}
+          </Link>
+
+          <Link to="/cart" className="relative hover:text-pink-600">
+            <FaShoppingCart />
+            {totalCartItems > 0 && (
+              <span className="absolute -top-2 -right-3 bg-pink-600 text-white text-xs font-bold px-2 py-0.5 rounded-full">
+                {totalCartItems}
+              </span>
+            )}
+          </Link>
+
+          {user ? (
+            <AccountDropdown />
+          ) : (
+            <div className="relative" ref={dropdownRef}>
+              <div
+                onClick={() => setShowUserDropdown((prev) => !prev)}
+                className="cursor-pointer hover:text-pink-600"
+              >
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M5.121 17.804A9.978 9.978 0 0112 15c2.21 0 4.25.713 5.879 1.804M15 11a3 3 0 11-6 0 3 0 016 0z"
+                  />
+                </svg>
+              </div>
+
+              {showUserDropdown && (
+                <div className="absolute right-0 mt-2 w-40 bg-white shadow-lg border rounded-md py-2 z-[9999]">
+                  <Link
+                    to="/login"
+                    className="block px-4 py-2 hover:bg-pink-100"
+                    onClick={() => setShowUserDropdown(false)}
+                  >
+                    Login
+                  </Link>
+                  <Link
+                    to="/signup"
+                    className="block px-4 py-2 hover:bg-pink-100"
+                    onClick={() => setShowUserDropdown(false)}
+                  >
+                    Sign Up
+                  </Link>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
       </div>
     </header>
   );
 };
 
 export default Header;
+
+
+
+
+
 
