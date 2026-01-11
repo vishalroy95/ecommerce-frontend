@@ -554,20 +554,26 @@ const Header = () => {
 
     {showUserDropdown && (
       <div className="absolute right-0 top-8 w-40 bg-white shadow-lg border rounded-md py-2 z-[9999]">
-        <Link
-          to="/login"
-          className="block px-4 py-2 hover:bg-pink-100"
-          onClick={() => setShowUserDropdown(false)}
-        >
-          Login
-        </Link>
-        <Link
-          to="/signup"
-          className="block px-4 py-2 hover:bg-pink-100"
-          onClick={() => setShowUserDropdown(false)}
-        >
-          Sign Up
-        </Link>
+        <div
+  onClick={() => {
+    setShowUserDropdown(false);
+    navigate("/login");
+  }}
+  className="block px-4 py-2 hover:bg-pink-100 cursor-pointer"
+>
+  Login
+</div>
+
+        <div
+  onClick={() => {
+    setShowUserDropdown(false);
+    navigate("/signup");
+  }}
+  className="block px-4 py-2 hover:bg-pink-100 cursor-pointer"
+>
+  Sign Up
+</div>
+
       </div>
     )}
   </div>
