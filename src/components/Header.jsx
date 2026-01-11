@@ -423,9 +423,6 @@
 // export default Header;
 
 
-
-
-
 import React, { useState, useEffect, useRef } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { FaHeart, FaShoppingCart } from "react-icons/fa";
@@ -446,7 +443,6 @@ const Header = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // 🔑 FIX: separate refs for mobile & desktop
   const mobileDropdownRef = useRef(null);
   const desktopDropdownRef = useRef(null);
 
@@ -476,33 +472,6 @@ const Header = () => {
     p.title.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleSearchKeyDown = (e) => {
-    if (e.key === "ArrowDown") {
-      e.preventDefault();
-      setActiveIndex((prev) =>
-        prev < filteredSuggestions.length - 1 ? prev + 1 : 0
-      );
-    } else if (e.key === "ArrowUp") {
-      e.preventDefault();
-      setActiveIndex((prev) =>
-        prev > 0 ? prev - 1 : filteredSuggestions.length - 1
-      );
-    } else if (e.key === "Enter") {
-      e.preventDefault();
-      if (activeIndex >= 0 && filteredSuggestions[activeIndex]) {
-        navigate(
-          `/search?q=${encodeURIComponent(
-            filteredSuggestions[activeIndex].title
-          )}`
-        );
-      } else if (searchTerm.trim()) {
-        navigate(`/search?q=${encodeURIComponent(searchTerm.trim())}`);
-      }
-      setSearchTerm("");
-      setActiveIndex(-1);
-    }
-  };
-
   const totalCartItems = cart.reduce(
     (sum, item) => sum + (item.quantity || 1),
     0
@@ -516,10 +485,7 @@ const Header = () => {
 
         {/* LOGO */}
         <div className="flex items-center justify-between md:justify-start md:col-span-1">
-          <Link
-            to="/"
-            className="text-pink-600 font-bold text-2xl tracking-wide"
-          >
+          <Link to="/" className="text-pink-600 font-bold text-2xl">
             IDEACRAFT
           </Link>
 
@@ -528,7 +494,7 @@ const Header = () => {
             <Link to="/wishlist" className="relative">
               <FaHeart />
               {totalWishlistItems > 0 && (
-                <span className="absolute -top-2 -right-3 bg-pink-600 text-white text-xs font-bold px-2 py-0.5 rounded-full">
+                <span className="absolute -top-2 -right-3 bg-pink-600 text-white text-xs px-2 rounded-full">
                   {totalWishlistItems}
                 </span>
               )}
@@ -537,13 +503,16 @@ const Header = () => {
             <Link to="/cart" className="relative">
               <FaShoppingCart />
               {totalCartItems > 0 && (
-                <span className="absolute -top-2 -right-3 bg-pink-600 text-white text-xs font-bold px-2 py-0.5 rounded-full">
+                <span className="absolute -top-2 -right-3 bg-pink-600 text-white text-xs px-2 rounded-full">
                   {totalCartItems}
                 </span>
               )}
             </Link>
 
-            {!user && (
+            {/* ✅ FIXED MOBILE USER LOGIC */}
+            {user ? (
+              <AccountDropdown />
+            ) : (
               <div className="relative" ref={mobileDropdownRef}>
                 <svg
                   onClick={() => setShowUserDropdown((p) => !p)}
@@ -588,99 +557,21 @@ const Header = () => {
         </div>
 
         {/* SEARCH */}
-        <div className="mt-3 md:mt-0 md:col-span-2 relative">
+        <div className="md:col-span-2 mt-3 md:mt-0">
           <input
             type="text"
             value={searchTerm}
-            onChange={(e) => {
-              setSearchTerm(e.target.value);
-              setActiveIndex(-1);
-            }}
-            onKeyDown={handleSearchKeyDown}
+            onChange={(e) => setSearchTerm(e.target.value)}
             placeholder="Search for beauty products, brands, etc..."
-            className="w-full px-5 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-pink-500"
+            className="w-full px-5 py-2 border rounded-full focus:ring-2 focus:ring-pink-500"
           />
-
-          {searchTerm && (
-            <div className="absolute top-12 left-0 w-full bg-white border rounded-md shadow-lg z-[9999]">
-              {filteredSuggestions.slice(0, 6).map((p, idx) => (
-                <div
-                  key={p._id}
-                  className={`px-4 py-2 cursor-pointer ${
-                    idx === activeIndex
-                      ? "bg-gray-200"
-                      : "hover:bg-gray-100"
-                  }`}
-                  onClick={() => {
-                    navigate(`/search?q=${encodeURIComponent(p.title)}`);
-                    setSearchTerm("");
-                    setActiveIndex(-1);
-                  }}
-                >
-                  {p.title}
-                </div>
-              ))}
-            </div>
-          )}
         </div>
 
         {/* DESKTOP ICONS */}
-        <div className="hidden md:flex items-center justify-end gap-5 text-gray-600 text-xl">
-          <Link to="/wishlist" className="relative">
-            <FaHeart />
-            {totalWishlistItems > 0 && (
-              <span className="absolute -top-2 -right-3 bg-pink-600 text-white text-xs font-bold px-2 py-0.5 rounded-full">
-                {totalWishlistItems}
-              </span>
-            )}
-          </Link>
-
-          <Link to="/cart" className="relative">
-            <FaShoppingCart />
-            {totalCartItems > 0 && (
-              <span className="absolute -top-2 -right-3 bg-pink-600 text-white text-xs font-bold px-2 py-0.5 rounded-full">
-                {totalCartItems}
-              </span>
-            )}
-          </Link>
-
-          {user ? (
-            <AccountDropdown />
-          ) : (
-            <div className="relative" ref={desktopDropdownRef}>
-              <svg
-                onClick={() => setShowUserDropdown((p) => !p)}
-                className="w-5 h-5 cursor-pointer"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M5.121 17.804A9.978 9.978 0 0112 15c2.21 0 4.25.713 5.879 1.804M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                />
-              </svg>
-
-              {showUserDropdown && (
-                <div className="absolute right-0 mt-2 w-40 bg-white shadow-lg border rounded-md py-2">
-                  <Link
-                    to="/login"
-                    className="block px-4 py-2 hover:bg-pink-100"
-                  >
-                    Login
-                  </Link>
-                  <Link
-                    to="/signup"
-                    className="block px-4 py-2 hover:bg-pink-100"
-                  >
-                    Sign Up
-                  </Link>
-                </div>
-              )}
-            </div>
-          )}
+        <div className="hidden md:flex justify-end gap-5 text-xl">
+          <Link to="/wishlist"><FaHeart /></Link>
+          <Link to="/cart"><FaShoppingCart /></Link>
+          {user ? <AccountDropdown /> : null}
         </div>
       </div>
     </header>
@@ -688,3 +579,4 @@ const Header = () => {
 };
 
 export default Header;
+
