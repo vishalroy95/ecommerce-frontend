@@ -605,11 +605,16 @@ const Header = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [showUserDropdown, setShowUserDropdown] = useState(false);
 
+  const [suggestions, setSuggestions] = useState([]);
+  const [activeSuggestion, setActiveSuggestion] = useState(-1);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+
   const navigate = useNavigate();
   const location = useLocation();
 
   const mobileDropdownRef = useRef(null);
   const desktopDropdownRef = useRef(null);
+  const searchRef = useRef(null);
 
   const user = JSON.parse(localStorage.getItem("user"));
 
@@ -623,9 +628,12 @@ const Header = () => {
         mobileDropdownRef.current &&
         !mobileDropdownRef.current.contains(e.target) &&
         desktopDropdownRef.current &&
-        !desktopDropdownRef.current.contains(e.target)
+        !desktopDropdownRef.current.contains(e.target) &&
+        searchRef.current &&
+        !searchRef.current.contains(e.target)
       ) {
         setShowUserDropdown(false);
+        setShowSuggestions(false);
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
@@ -637,6 +645,54 @@ const Header = () => {
     0
   );
   const totalWishlistItems = wishlist.length;
+
+  // --- SEARCH LOGIC ---
+  const handleSearchChange = (e) => {
+    const value = e.target.value;
+    setSearchTerm(value);
+
+    if (value.length > 0) {
+      const filtered = products
+        .filter((p) =>
+          p.name.toLowerCase().includes(value.toLowerCase())
+        )
+        .slice(0, 5); // max 5 suggestions
+      setSuggestions(filtered);
+      setShowSuggestions(true);
+      setActiveSuggestion(-1);
+    } else {
+      setShowSuggestions(false);
+    }
+  };
+
+  const handleKeyDown = (e) => {
+    if (!showSuggestions) return;
+
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setActiveSuggestion((prev) =>
+        prev < suggestions.length - 1 ? prev + 1 : 0
+      );
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setActiveSuggestion((prev) =>
+        prev > 0 ? prev - 1 : suggestions.length - 1
+      );
+    } else if (e.key === "Enter") {
+      e.preventDefault();
+      if (activeSuggestion >= 0) {
+        navigate(`/product/${suggestions[activeSuggestion].id}`);
+        setShowSuggestions(false);
+        setSearchTerm("");
+      }
+    }
+  };
+
+  const handleSuggestionClick = (id) => {
+    navigate(`/product/${id}`);
+    setShowSuggestions(false);
+    setSearchTerm("");
+  };
 
   const UserIcon = ({ refProp }) => (
     <div className="relative" ref={refProp}>
@@ -683,7 +739,6 @@ const Header = () => {
   return (
     <header className="bg-white shadow-md sticky top-0 z-50">
       <div className="max-w-[1280px] mx-auto px-4 py-3 md:grid md:grid-cols-4 md:items-center md:gap-6">
-
         {/* LOGO */}
         <div className="flex items-center justify-between md:justify-start md:col-span-1">
           <Link to="/" className="text-pink-600 font-bold text-2xl">
@@ -710,27 +765,40 @@ const Header = () => {
               )}
             </Link>
 
-            {user ? (
-              <AccountDropdown />
-            ) : (
-              <UserIcon refProp={mobileDropdownRef} />
-            )}
+            {user ? <AccountDropdown /> : <UserIcon refProp={mobileDropdownRef} />}
           </div>
         </div>
 
-        {/* SEARCH (pink border only, no black) */}
-        <div className="mt-3 md:mt-0 md:col-span-2">
+        {/* SEARCH */}
+        <div className="mt-3 md:mt-0 md:col-span-2 relative" ref={searchRef}>
           <input
             type="text"
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={handleSearchChange}
+            onKeyDown={handleKeyDown}
             placeholder="Search for beauty products, brands, etc..."
             className="w-full px-5 py-2 border border-pink-500 rounded-full
                        focus:outline-none focus:ring-2 focus:ring-pink-500"
           />
+
+          {showSuggestions && suggestions.length > 0 && (
+            <ul className="absolute z-50 w-full bg-white border border-pink-500 rounded-md mt-1 max-h-60 overflow-auto shadow-lg">
+              {suggestions.map((s, index) => (
+                <li
+                  key={s.id}
+                  onClick={() => handleSuggestionClick(s.id)}
+                  className={`px-4 py-2 cursor-pointer hover:bg-pink-100 ${
+                    index === activeSuggestion ? "bg-pink-200" : ""
+                  }`}
+                >
+                  {s.name}
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
 
-        {/* DESKTOP ICONS (same logic as mobile) */}
+        {/* DESKTOP ICONS */}
         <div className="hidden md:flex justify-end gap-5 text-gray-600 text-xl">
           <Link to="/wishlist" className="relative">
             <FaHeart />
@@ -750,11 +818,7 @@ const Header = () => {
             )}
           </Link>
 
-          {user ? (
-            <AccountDropdown />
-          ) : (
-            <UserIcon refProp={desktopDropdownRef} />
-          )}
+          {user ? <AccountDropdown /> : <UserIcon refProp={desktopDropdownRef} />}
         </div>
       </div>
     </header>
@@ -762,6 +826,3 @@ const Header = () => {
 };
 
 export default Header;
-
-
-
