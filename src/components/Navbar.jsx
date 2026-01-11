@@ -125,9 +125,6 @@
 
 
 
-
-
-
 import React, { useState } from "react";
 import navItems from "../data/navitems";
 import { ChevronDown, Menu, X } from "lucide-react";
@@ -137,7 +134,6 @@ const Navbar = () => {
   const [openDropdown, setOpenDropdown] = useState(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  // Toggle dropdown for mobile
   const toggleDropdown = (index) => {
     setOpenDropdown(openDropdown === index ? null : index);
   };
@@ -145,9 +141,9 @@ const Navbar = () => {
   return (
     <nav className="w-full z-50 bg-black border-b border-gray-700 shadow-sm">
       <div className="max-w-7xl mx-auto px-6 py-3 flex justify-between items-center">
-        <div className="text-white font-bold text-xl">Logo</div>
+        
 
-        {/* Hamburger mobile button */}
+        {/* Hamburger button */}
         <div className="md:hidden">
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -236,5 +232,6 @@ const Navbar = () => {
 };
 
 export default Navbar;
+
 
                
