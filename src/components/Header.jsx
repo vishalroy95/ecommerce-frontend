@@ -423,6 +423,7 @@
 // export default Header;
 
 
+
 import React, { useState, useEffect, useRef } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { FaHeart, FaShoppingCart } from "react-icons/fa";
@@ -509,7 +510,7 @@ const Header = () => {
               )}
             </Link>
 
-            {/* ✅ FIXED MOBILE USER LOGIC */}
+            {/* ✅ MOBILE USER LOGIC FIXED */}
             {user ? (
               <AccountDropdown />
             ) : (
@@ -557,7 +558,7 @@ const Header = () => {
         </div>
 
         {/* SEARCH */}
-        <div className="md:col-span-2 mt-3 md:mt-0">
+        <div className="mt-3 md:mt-0 md:col-span-2">
           <input
             type="text"
             value={searchTerm}
@@ -579,4 +580,5 @@ const Header = () => {
 };
 
 export default Header;
+
 
