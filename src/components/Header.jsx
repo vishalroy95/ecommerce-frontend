@@ -843,18 +843,46 @@ const Header = () => {
 
         {/* ===== MOBILE SEARCH ONLY ===== */}
         <div className="sm:hidden mt-3 relative">
-          <input
-            type="text"
-            value={searchTerm}
-            onChange={(e) => {
-              setSearchTerm(e.target.value);
+  <input
+    type="text"
+    value={searchTerm}
+    onChange={(e) => {
+      setSearchTerm(e.target.value);
+      setActiveIndex(-1);
+    }}
+    onKeyDown={handleSearchKeyDown}
+    placeholder="Search products..."
+    className="w-full px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-pink-500"
+  />
+
+  {searchTerm && (
+    <div className="absolute top-12 left-0 w-full bg-white border rounded-md shadow-lg max-h-60 overflow-y-auto z-50">
+      {filteredSuggestions.length > 0 ? (
+        filteredSuggestions.slice(0, 6).map((p, idx) => (
+          <div
+            key={p._id}
+            className={`px-4 py-2 cursor-pointer ${
+              idx === activeIndex
+                ? "bg-gray-200"
+                : "hover:bg-gray-100"
+            }`}
+            onClick={() => {
+              navigate(`/search?q=${encodeURIComponent(p.title)}`);
+              setSearchTerm("");
               setActiveIndex(-1);
             }}
-            onKeyDown={handleSearchKeyDown}
-            placeholder="Search products..."
-            className="w-full px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-pink-500"
-          />
+          >
+            {p.title}
+          </div>
+        ))
+      ) : (
+        <div className="px-4 py-2 text-gray-500">
+          No suggestions found
         </div>
+      )}
+    </div>
+  )}
+</div>
 
       </div>
     </header>
