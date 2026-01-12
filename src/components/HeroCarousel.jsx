@@ -56,6 +56,135 @@
 
 
 
+// // src/components/HeroCarousel.jsx
+// import React, { useState, useEffect, useRef } from "react";
+
+// const heroImages = [
+//   "/assets/hero1.jpg",
+//   "/assets/hero2.jpg",
+//   "/assets/hero3.jpg",
+// ];
+
+// const HeroCarousel = () => {
+//   const [current, setCurrent] = useState(0);
+//   const [paused, setPaused] = useState(false);
+//   const touchStartX = useRef(0);
+
+//   // auto slide
+//   useEffect(() => {
+//     if (paused) return;
+
+//     const timer = setInterval(() => {
+//       setCurrent((prev) => (prev + 1) % heroImages.length);
+//     }, 5000);
+
+//     return () => clearInterval(timer);
+//   }, [paused]);
+
+//   // swipe handlers
+//   const handleTouchStart = (e) => {
+//     touchStartX.current = e.touches[0].clientX;
+//   };
+
+//   const handleTouchEnd = (e) => {
+//     const diff = touchStartX.current - e.changedTouches[0].clientX;
+//     if (diff > 50) {
+//       setCurrent((current + 1) % heroImages.length);
+//     } else if (diff < -50) {
+//       setCurrent(
+//         (current - 1 + heroImages.length) % heroImages.length
+//       );
+//     }
+//   };
+
+//   return (
+//     <div
+//       className="
+//         relative w-full overflow-hidden
+//         h-[180px] sm:h-[260px] md:h-[360px] lg:h-[450px]
+//       "
+//       onMouseEnter={() => setPaused(true)}
+//       onMouseLeave={() => setPaused(false)}
+//       onTouchStart={handleTouchStart}
+//       onTouchEnd={handleTouchEnd}
+//     >
+//       {heroImages.map((src, idx) => (
+//         <img
+//           key={idx}
+//           src={src}
+//           alt={`Slide ${idx + 1}`}
+//           className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ${
+//             current === idx ? "opacity-100" : "opacity-0"
+//           }`}
+//         />
+//       ))}
+
+//       {/* Left Arrow */}
+//       <button
+//         onClick={() =>
+//           setCurrent(
+//             (current - 1 + heroImages.length) % heroImages.length
+//           )
+//         }
+//         className="
+//           absolute left-3 sm:left-5 top-1/2 -translate-y-1/2
+//           w-10 h-10 sm:w-12 sm:h-12
+//           bg-black/60 hover:bg-black/80
+//           text-white
+//           rounded-full
+//           flex items-center justify-center
+//           backdrop-blur
+//           shadow-lg
+//           transition
+//         "
+//       >
+//         ‹
+//       </button>
+
+//       {/* Right Arrow */}
+//       <button
+//         onClick={() =>
+//           setCurrent((current + 1) % heroImages.length)
+//         }
+//         className="
+//           absolute right-3 sm:right-5 top-1/2 -translate-y-1/2
+//           w-10 h-10 sm:w-12 sm:h-12
+//           bg-black/60 hover:bg-black/80
+//           text-white
+//           rounded-full
+//           flex items-center justify-center
+//           backdrop-blur
+//           shadow-lg
+//           transition
+//         "
+//       >
+//         ›
+//       </button>
+
+//       {/* Dots */}
+//       <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-2">
+//         {heroImages.map((_, idx) => (
+//           <button
+//             key={idx}
+//             onClick={() => setCurrent(idx)}
+//             className={`w-2.5 h-2.5 rounded-full transition ${
+//               current === idx
+//                 ? "bg-white"
+//                 : "bg-white/50"
+//             }`}
+//           />
+//         ))}
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default HeroCarousel;
+
+
+
+
+
 // src/components/HeroCarousel.jsx
 import React, { useState, useEffect, useRef } from "react";
 
@@ -100,7 +229,7 @@ const HeroCarousel = () => {
   return (
     <div
       className="
-        relative w-full overflow-hidden
+        relative w-full overflow-hidden group
         h-[180px] sm:h-[260px] md:h-[360px] lg:h-[450px]
       "
       onMouseEnter={() => setPaused(true)}
@@ -119,7 +248,7 @@ const HeroCarousel = () => {
         />
       ))}
 
-      {/* Left Arrow */}
+      {/* Left Arrow – PLAIN */}
       <button
         onClick={() =>
           setCurrent(
@@ -127,35 +256,29 @@ const HeroCarousel = () => {
           )
         }
         className="
-          absolute left-3 sm:left-5 top-1/2 -translate-y-1/2
-          w-10 h-10 sm:w-12 sm:h-12
-          bg-black/60 hover:bg-black/80
-          text-white
-          rounded-full
-          flex items-center justify-center
-          backdrop-blur
-          shadow-lg
-          transition
+          absolute left-3 sm:left-6 top-1/2 -translate-y-1/2
+          text-white text-4xl sm:text-5xl font-light
+          transition-all duration-300
+
+          opacity-0 pointer-events-none
+          group-hover:opacity-100 group-hover:pointer-events-auto
         "
       >
         ‹
       </button>
 
-      {/* Right Arrow */}
+      {/* Right Arrow – PLAIN */}
       <button
         onClick={() =>
           setCurrent((current + 1) % heroImages.length)
         }
         className="
-          absolute right-3 sm:right-5 top-1/2 -translate-y-1/2
-          w-10 h-10 sm:w-12 sm:h-12
-          bg-black/60 hover:bg-black/80
-          text-white
-          rounded-full
-          flex items-center justify-center
-          backdrop-blur
-          shadow-lg
-          transition
+          absolute right-3 sm:right-6 top-1/2 -translate-y-1/2
+          text-white text-4xl sm:text-5xl font-light
+          transition-all duration-300
+
+          opacity-0 pointer-events-none
+          group-hover:opacity-100 group-hover:pointer-events-auto
         "
       >
         ›
@@ -168,9 +291,7 @@ const HeroCarousel = () => {
             key={idx}
             onClick={() => setCurrent(idx)}
             className={`w-2.5 h-2.5 rounded-full transition ${
-              current === idx
-                ? "bg-white"
-                : "bg-white/50"
+              current === idx ? "bg-white" : "bg-white/50"
             }`}
           />
         ))}
@@ -180,4 +301,3 @@ const HeroCarousel = () => {
 };
 
 export default HeroCarousel;
-
