@@ -589,6 +589,249 @@
 
 
 
+// import React, { useState, useEffect, useRef } from "react";
+// import { Link, useNavigate, useLocation } from "react-router-dom";
+// import { FaHeart, FaShoppingCart } from "react-icons/fa";
+// import { useWishlist } from "../context/WishlistContext";
+// import { useCart } from "../context/CartContext";
+// import AccountDropdown from "../pages/AccountDropdown";
+// import useProducts from "../hooks/useProducts";
+
+// const Header = () => {
+//   const { cart } = useCart();
+//   const { wishlist } = useWishlist();
+//   const { products } = useProducts();
+
+//   const [searchTerm, setSearchTerm] = useState("");
+//   const [showUserDropdown, setShowUserDropdown] = useState(false);
+
+//   const [suggestions, setSuggestions] = useState([]);
+//   const [activeSuggestion, setActiveSuggestion] = useState(-1);
+//   const [showSuggestions, setShowSuggestions] = useState(false);
+
+//   const navigate = useNavigate();
+//   const location = useLocation();
+
+//   const mobileDropdownRef = useRef(null);
+//   const desktopDropdownRef = useRef(null);
+//   const searchRef = useRef(null);
+
+//   const user = JSON.parse(localStorage.getItem("user"));
+
+//   useEffect(() => {
+//     if (location.pathname === "/") setSearchTerm("");
+//   }, [location.pathname]);
+
+//   useEffect(() => {
+//     function handleClickOutside(e) {
+//       if (
+//         mobileDropdownRef.current &&
+//         !mobileDropdownRef.current.contains(e.target) &&
+//         desktopDropdownRef.current &&
+//         !desktopDropdownRef.current.contains(e.target) &&
+//         searchRef.current &&
+//         !searchRef.current.contains(e.target)
+//       ) {
+//         setShowUserDropdown(false);
+//         setShowSuggestions(false);
+//       }
+//     }
+//     document.addEventListener("mousedown", handleClickOutside);
+//     return () => document.removeEventListener("mousedown", handleClickOutside);
+//   }, []);
+
+//   const totalCartItems = cart.reduce(
+//     (sum, item) => sum + (item.quantity || 1),
+//     0
+//   );
+//   const totalWishlistItems = wishlist.length;
+
+//   // --- SEARCH LOGIC ---
+//   const handleSearchChange = (e) => {
+//     const value = e.target.value;
+//     setSearchTerm(value);
+
+//     if (value.length > 0) {
+//       const filtered = products
+//         .filter((p) =>
+//           p.name.toLowerCase().includes(value.toLowerCase())
+//         )
+//         .slice(0, 5); // max 5 suggestions
+//       setSuggestions(filtered);
+//       setShowSuggestions(true);
+//       setActiveSuggestion(-1);
+//     } else {
+//       setShowSuggestions(false);
+//     }
+//   };
+
+//   const handleKeyDown = (e) => {
+//     if (!showSuggestions) return;
+
+//     if (e.key === "ArrowDown") {
+//       e.preventDefault();
+//       setActiveSuggestion((prev) =>
+//         prev < suggestions.length - 1 ? prev + 1 : 0
+//       );
+//     } else if (e.key === "ArrowUp") {
+//       e.preventDefault();
+//       setActiveSuggestion((prev) =>
+//         prev > 0 ? prev - 1 : suggestions.length - 1
+//       );
+//     } else if (e.key === "Enter") {
+//       e.preventDefault();
+//       if (activeSuggestion >= 0) {
+//         navigate(`/product/${suggestions[activeSuggestion].id}`);
+//         setShowSuggestions(false);
+//         setSearchTerm("");
+//       }
+//     }
+//   };
+
+//   const handleSuggestionClick = (id) => {
+//     navigate(`/product/${id}`);
+//     setShowSuggestions(false);
+//     setSearchTerm("");
+//   };
+
+//   const UserIcon = ({ refProp }) => (
+//     <div className="relative" ref={refProp}>
+//       <svg
+//         onClick={() => setShowUserDropdown((p) => !p)}
+//         className="w-5 h-5 cursor-pointer"
+//         fill="none"
+//         stroke="currentColor"
+//         strokeWidth="2"
+//         viewBox="0 0 24 24"
+//       >
+//         <path
+//           strokeLinecap="round"
+//           strokeLinejoin="round"
+//           d="M5.121 17.804A9.978 9.978 0 0112 15c2.21 0 4.25.713 5.879 1.804M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+//         />
+//       </svg>
+
+//       {showUserDropdown && (
+//         <div className="absolute right-0 top-8 w-40 bg-white shadow-lg border rounded-md py-2 z-[9999]">
+//           <div
+//             onClick={() => {
+//               setShowUserDropdown(false);
+//               navigate("/login");
+//             }}
+//             className="px-4 py-2 hover:bg-pink-100 cursor-pointer"
+//           >
+//             Login
+//           </div>
+//           <div
+//             onClick={() => {
+//               setShowUserDropdown(false);
+//               navigate("/signup");
+//             }}
+//             className="px-4 py-2 hover:bg-pink-100 cursor-pointer"
+//           >
+//             Sign Up
+//           </div>
+//         </div>
+//       )}
+//     </div>
+//   );
+
+//   return (
+//     <header className="bg-white shadow-md sticky top-0 z-50">
+//       <div className="max-w-[1280px] mx-auto px-4 py-3 md:grid md:grid-cols-4 md:items-center md:gap-6">
+//         {/* LOGO */}
+//         <div className="flex items-center justify-between md:justify-start md:col-span-1">
+//           <Link to="/" className="text-pink-600 font-bold text-2xl">
+//             IDEACRAFT
+//           </Link>
+
+//           {/* MOBILE ICONS */}
+//           <div className="flex items-center gap-5 text-gray-600 text-xl md:hidden">
+//             <Link to="/wishlist" className="relative">
+//               <FaHeart />
+//               {totalWishlistItems > 0 && (
+//                 <span className="absolute -top-2 -right-3 bg-pink-600 text-white text-xs px-2 rounded-full">
+//                   {totalWishlistItems}
+//                 </span>
+//               )}
+//             </Link>
+
+//             <Link to="/cart" className="relative">
+//               <FaShoppingCart />
+//               {totalCartItems > 0 && (
+//                 <span className="absolute -top-2 -right-3 bg-pink-600 text-white text-xs px-2 rounded-full">
+//                   {totalCartItems}
+//                 </span>
+//               )}
+//             </Link>
+
+//             {user ? <AccountDropdown /> : <UserIcon refProp={mobileDropdownRef} />}
+//           </div>
+//         </div>
+
+//         {/* SEARCH */}
+//         <div className="mt-3 md:mt-0 md:col-span-2 relative" ref={searchRef}>
+//           <input
+//             type="text"
+//             value={searchTerm}
+//             onChange={handleSearchChange}
+//             onKeyDown={handleKeyDown}
+//             placeholder="Search for beauty products, brands, etc..."
+//             className="w-full px-5 py-2 border border-pink-500 rounded-full
+//                        focus:outline-none focus:ring-2 focus:ring-pink-500"
+//           />
+
+//           {showSuggestions && suggestions.length > 0 && (
+//             <ul className="absolute z-50 w-full bg-white border border-pink-500 rounded-md mt-1 max-h-60 overflow-auto shadow-lg">
+//               {suggestions.map((s, index) => (
+//                 <li
+//                   key={s.id}
+//                   onClick={() => handleSuggestionClick(s.id)}
+//                   className={`px-4 py-2 cursor-pointer hover:bg-pink-100 ${
+//                     index === activeSuggestion ? "bg-pink-200" : ""
+//                   }`}
+//                 >
+//                   {s.name}
+//                 </li>
+//               ))}
+//             </ul>
+//           )}
+//         </div>
+
+//         {/* DESKTOP ICONS */}
+//         <div className="hidden md:flex justify-end gap-5 text-gray-600 text-xl">
+//           <Link to="/wishlist" className="relative">
+//             <FaHeart />
+//             {totalWishlistItems > 0 && (
+//               <span className="absolute -top-2 -right-3 bg-pink-600 text-white text-xs px-2 rounded-full">
+//                 {totalWishlistItems}
+//               </span>
+//             )}
+//           </Link>
+
+//           <Link to="/cart" className="relative">
+//             <FaShoppingCart />
+//             {totalCartItems > 0 && (
+//               <span className="absolute -top-2 -right-3 bg-pink-600 text-white text-xs px-2 rounded-full">
+//                 {totalCartItems}
+//               </span>
+//             )}
+//           </Link>
+
+//           {user ? <AccountDropdown /> : <UserIcon refProp={desktopDropdownRef} />}
+//         </div>
+//       </div>
+//     </header>
+//   );
+// };
+
+// export default Header;
+
+
+
+
+
+
 import React, { useState, useEffect, useRef } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { FaHeart, FaShoppingCart } from "react-icons/fa";
@@ -603,11 +846,8 @@ const Header = () => {
   const { products } = useProducts();
 
   const [searchTerm, setSearchTerm] = useState("");
-  const [showUserDropdown, setShowUserDropdown] = useState(false);
-
-  const [suggestions, setSuggestions] = useState([]);
   const [activeSuggestion, setActiveSuggestion] = useState(-1);
-  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [showUserDropdown, setShowUserDropdown] = useState(false);
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -633,11 +873,12 @@ const Header = () => {
         !searchRef.current.contains(e.target)
       ) {
         setShowUserDropdown(false);
-        setShowSuggestions(false);
+        setActiveSuggestion(-1);
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    return () =>
+      document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   const totalCartItems = cart.reduce(
@@ -646,52 +887,37 @@ const Header = () => {
   );
   const totalWishlistItems = wishlist.length;
 
-  // --- SEARCH LOGIC ---
-  const handleSearchChange = (e) => {
-    const value = e.target.value;
-    setSearchTerm(value);
+  // 🔍 DERIVED SEARCH SUGGESTIONS (OLD WORKING LOGIC)
+  const filteredSuggestions = searchTerm
+    ? products.filter((p) =>
+        p.name?.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    : [];
 
-    if (value.length > 0) {
-      const filtered = products
-        .filter((p) =>
-          p.name.toLowerCase().includes(value.toLowerCase())
-        )
-        .slice(0, 5); // max 5 suggestions
-      setSuggestions(filtered);
-      setShowSuggestions(true);
-      setActiveSuggestion(-1);
-    } else {
-      setShowSuggestions(false);
-    }
-  };
-
+  // ⌨️ KEYBOARD HANDLER
   const handleKeyDown = (e) => {
-    if (!showSuggestions) return;
+    if (!filteredSuggestions.length) return;
 
     if (e.key === "ArrowDown") {
       e.preventDefault();
       setActiveSuggestion((prev) =>
-        prev < suggestions.length - 1 ? prev + 1 : 0
+        prev < filteredSuggestions.length - 1 ? prev + 1 : 0
       );
-    } else if (e.key === "ArrowUp") {
+    }
+
+    if (e.key === "ArrowUp") {
       e.preventDefault();
       setActiveSuggestion((prev) =>
-        prev > 0 ? prev - 1 : suggestions.length - 1
+        prev > 0 ? prev - 1 : filteredSuggestions.length - 1
       );
-    } else if (e.key === "Enter") {
-      e.preventDefault();
-      if (activeSuggestion >= 0) {
-        navigate(`/product/${suggestions[activeSuggestion].id}`);
-        setShowSuggestions(false);
-        setSearchTerm("");
-      }
     }
-  };
 
-  const handleSuggestionClick = (id) => {
-    navigate(`/product/${id}`);
-    setShowSuggestions(false);
-    setSearchTerm("");
+    if (e.key === "Enter" && activeSuggestion >= 0) {
+      e.preventDefault();
+      navigate(`/product/${filteredSuggestions[activeSuggestion].id}`);
+      setSearchTerm("");
+      setActiveSuggestion(-1);
+    }
   };
 
   const UserIcon = ({ refProp }) => (
@@ -765,7 +991,11 @@ const Header = () => {
               )}
             </Link>
 
-            {user ? <AccountDropdown /> : <UserIcon refProp={mobileDropdownRef} />}
+            {user ? (
+              <AccountDropdown />
+            ) : (
+              <UserIcon refProp={mobileDropdownRef} />
+            )}
           </div>
         </div>
 
@@ -774,27 +1004,43 @@ const Header = () => {
           <input
             type="text"
             value={searchTerm}
-            onChange={handleSearchChange}
+            onChange={(e) => {
+              setSearchTerm(e.target.value);
+              setActiveSuggestion(-1);
+            }}
             onKeyDown={handleKeyDown}
             placeholder="Search for beauty products, brands, etc..."
             className="w-full px-5 py-2 border border-pink-500 rounded-full
                        focus:outline-none focus:ring-2 focus:ring-pink-500"
           />
 
-          {showSuggestions && suggestions.length > 0 && (
-            <ul className="absolute z-50 w-full bg-white border border-pink-500 rounded-md mt-1 max-h-60 overflow-auto shadow-lg">
-              {suggestions.map((s, index) => (
-                <li
-                  key={s.id}
-                  onClick={() => handleSuggestionClick(s.id)}
-                  className={`px-4 py-2 cursor-pointer hover:bg-pink-100 ${
-                    index === activeSuggestion ? "bg-pink-200" : ""
-                  }`}
-                >
-                  {s.name}
-                </li>
-              ))}
-            </ul>
+          {searchTerm && (
+            <div className="absolute z-50 w-full bg-white border border-pink-500 rounded-md mt-1 max-h-60 overflow-auto shadow-lg">
+              {filteredSuggestions.length > 0 ? (
+                filteredSuggestions.slice(0, 5).map((p, index) => (
+                  <div
+                    key={p.id}
+                    onClick={() => {
+                      navigate(`/product/${p.id}`);
+                      setSearchTerm("");
+                      setActiveSuggestion(-1);
+                      document.activeElement.blur();
+                    }}
+                    className={`px-4 py-2 cursor-pointer ${
+                      index === activeSuggestion
+                        ? "bg-pink-200"
+                        : "hover:bg-pink-100"
+                    }`}
+                  >
+                    {p.name}
+                  </div>
+                ))
+              ) : (
+                <div className="px-4 py-2 text-gray-500">
+                  No suggestions found
+                </div>
+              )}
+            </div>
           )}
         </div>
 
@@ -818,7 +1064,11 @@ const Header = () => {
             )}
           </Link>
 
-          {user ? <AccountDropdown /> : <UserIcon refProp={desktopDropdownRef} />}
+          {user ? (
+            <AccountDropdown />
+          ) : (
+            <UserIcon refProp={desktopDropdownRef} />
+          )}
         </div>
       </div>
     </header>
@@ -826,3 +1076,4 @@ const Header = () => {
 };
 
 export default Header;
+
