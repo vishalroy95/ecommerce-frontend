@@ -890,7 +890,7 @@ const Header = () => {
   // 🔍 DERIVED SEARCH SUGGESTIONS (OLD WORKING LOGIC)
   const filteredSuggestions = searchTerm
     ? products.filter((p) =>
-        p.name?.toLowerCase().includes(searchTerm.toLowerCase())
+        p.title?.toLowerCase().includes(searchTerm.toLowerCase())
       )
     : [];
 
@@ -1032,7 +1032,7 @@ const Header = () => {
                         : "hover:bg-pink-100"
                     }`}
                   >
-                    {p.name}
+                    {p.title}
                   </div>
                 ))
               ) : (
