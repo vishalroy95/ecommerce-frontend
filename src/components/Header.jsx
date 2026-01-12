@@ -608,8 +608,8 @@ const Header = () => {
         </div>
 
         {/* SEARCH (FULL WIDTH ON MOBILE, CENTERED ON DESKTOP) */}
-        <div className="mt-3 relative md:max-w-xl md:mx-auto">
-          <input
+         <div className="mt-3 relative md:max-w-xl">
+           <input
             type="text"
             value={searchTerm}
             onChange={(e) => {
