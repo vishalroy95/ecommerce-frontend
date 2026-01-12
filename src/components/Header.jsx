@@ -662,7 +662,6 @@
 
 
 
-
 import React, { useState, useEffect, useRef } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { FaHeart, FaShoppingCart } from "react-icons/fa";
@@ -672,6 +671,7 @@ import AccountDropdown from "../pages/AccountDropdown";
 import useProducts from "../hooks/useProducts";
 
 const Header = () => {
+  /* ================= LOGIC (COMMON) ================= */
   const { cart } = useCart();
   const { wishlist } = useWishlist();
   const { products } = useProducts();
@@ -738,8 +738,10 @@ const Header = () => {
   );
   const totalWishlistItems = wishlist.length;
 
-  const SearchBox = ({ className = "" }) => (
-    <div className={`relative ${className}`}>
+  /* ================= COMMON COMPONENTS ================= */
+
+  const SearchBox = () => (
+    <div className="relative w-full">
       <input
         type="text"
         value={searchTerm}
@@ -784,93 +786,108 @@ const Header = () => {
     </div>
   );
 
+  const IconsSection = () => (
+    <div className="flex items-center gap-5 text-gray-600 text-xl">
+      <Link to="/wishlist" className="relative">
+        <FaHeart />
+        {totalWishlistItems > 0 && (
+          <span className="absolute -top-2 -right-3 bg-pink-600 text-white text-xs px-2 rounded-full">
+            {totalWishlistItems}
+          </span>
+        )}
+      </Link>
+
+      <Link to="/cart" className="relative">
+        <FaShoppingCart />
+        {totalCartItems > 0 && (
+          <span className="absolute -top-2 -right-3 bg-pink-600 text-white text-xs px-2 rounded-full">
+            {totalCartItems}
+          </span>
+        )}
+      </Link>
+
+      {user ? (
+        <AccountDropdown />
+      ) : (
+        <div className="relative" ref={dropdownRef}>
+          <svg
+            onClick={() => setShowUserDropdown((prev) => !prev)}
+            className="w-5 h-5 cursor-pointer"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M5.121 17.804A9.978 9.978 0 0112 15c2.21 0 4.25.713 5.879 1.804M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+            />
+          </svg>
+
+          {showUserDropdown && (
+            <div className="absolute right-0 mt-2 w-40 bg-white shadow-lg border rounded-md py-2 z-[1000]">
+              <Link
+                to="/login"
+                className="block px-4 py-2 hover:bg-pink-100"
+                onClick={() => setShowUserDropdown(false)}
+              >
+                Login
+              </Link>
+              <Link
+                to="/signup"
+                className="block px-4 py-2 hover:bg-pink-100"
+                onClick={() => setShowUserDropdown(false)}
+              >
+                Sign Up
+              </Link>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+
+  /* ================= UI ================= */
   return (
     <header className="bg-white shadow-md sticky top-0 z-50">
       <div className="max-w-[1280px] mx-auto px-4 py-3">
-        {/* TOP ROW */}
-        <div className="flex items-center justify-between gap-4">
-          {/* Logo */}
-          <Link to="/" className="text-pink-600 font-bold text-2xl">
-            IDEACRAFT
-          </Link>
 
-          {/* DESKTOP SEARCH */}
-          <div className="hidden md:flex flex-1 justify-center max-w-xl">
-            <SearchBox className="w-full" />
+        {/* DESKTOP */}
+        <div className="hidden md:block">
+          <div className="flex items-center justify-between">
+            <Link to="/" className="text-pink-600 font-bold text-2xl">
+              IDEACRAFT
+            </Link>
+            <IconsSection />
           </div>
 
-          {/* Icons */}
-          <div className="flex items-center gap-5 text-gray-600 text-xl">
-            <Link to="/wishlist" className="relative">
-              <FaHeart />
-              {totalWishlistItems > 0 && (
-                <span className="absolute -top-2 -right-3 bg-pink-600 text-white text-xs px-2 rounded-full">
-                  {totalWishlistItems}
-                </span>
-              )}
-            </Link>
-
-            <Link to="/cart" className="relative">
-              <FaShoppingCart />
-              {totalCartItems > 0 && (
-                <span className="absolute -top-2 -right-3 bg-pink-600 text-white text-xs px-2 rounded-full">
-                  {totalCartItems}
-                </span>
-              )}
-            </Link>
-
-            {user ? (
-              <AccountDropdown />
-            ) : (
-              <div className="relative" ref={dropdownRef}>
-                <svg
-                  onClick={() => setShowUserDropdown((prev) => !prev)}
-                  className="w-5 h-5 cursor-pointer"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M5.121 17.804A9.978 9.978 0 0112 15c2.21 0 4.25.713 5.879 1.804M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                  />
-                </svg>
-
-                {showUserDropdown && (
-                  <div className="absolute right-0 mt-2 w-40 bg-white shadow-lg border rounded-md py-2 z-[1000]">
-                    <Link
-                      to="/login"
-                      className="block px-4 py-2 hover:bg-pink-100"
-                      onClick={() => setShowUserDropdown(false)}
-                    >
-                      Login
-                    </Link>
-                    <Link
-                      to="/signup"
-                      className="block px-4 py-2 hover:bg-pink-100"
-                      onClick={() => setShowUserDropdown(false)}
-                    >
-                      Sign Up
-                    </Link>
-                  </div>
-                )}
-              </div>
-            )}
+          <div className="mt-3 max-w-xl">
+            <SearchBox />
           </div>
         </div>
 
-        {/* MOBILE SEARCH */}
-        <div className="mt-3 md:hidden">
-          <SearchBox />
+        {/* MOBILE */}
+        <div className="md:hidden">
+          <div className="flex items-center justify-between">
+            <Link to="/" className="text-pink-600 font-bold text-xl">
+              IDEACRAFT
+            </Link>
+            <IconsSection />
+          </div>
+
+          <div className="mt-3">
+            <SearchBox />
+          </div>
         </div>
+
       </div>
     </header>
   );
 };
 
 export default Header;
+
 
 
 
